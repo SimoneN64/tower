@@ -1,14 +1,36 @@
 #include <errno.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <direct.h>
 #include <windows.h>
+//#include <allegro.h>
 #define TOWER_VERSION "1.5.1"
 
 int itrcheck;
 char working_directory[1024];
 bool dropped_file_is_not_a_replay;
+
+void exit_func_00401000(void* func) {
+  atexit(func);
+}
+
+void _install_allegro_version_check(int a, int* b, void* c, int d) {
+  // STUB!!
+}
+
+void register_png_file_type() {
+  // STUB!!
+}
+
+void get_executable_name(char* dst, int len) {
+  // STUB!!
+}
+
+void replace_filename(char* cwd, char* dst, char* src, int len) {
+  // STUB!!
+}
 
 int main(int argc,char **argv)
 {
@@ -33,7 +55,7 @@ int main(int argc,char **argv)
     printf("No exception handler present, RPTs will not be generated");
   }
   errno_ptr = _errno();
-  _install_allegro_version_check(0,errno_ptr,FUN_00401000,0x40401);
+  _install_allegro_version_check(0,errno_ptr,exit_func_00401000,0x40401);
   register_png_file_type();
   get_executable_name(full_path,0x400);
   replace_filename(working_directory,full_path,"",0x400);
