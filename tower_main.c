@@ -2,10 +2,13 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <direct.h>
 #include <windows.h>
 #define TOWER_VERSION "1.5.1"
 
 int itrcheck;
+char working_directory[1024];
+bool dropped_file_is_not_a_replay;
 
 int main(int argc,char **argv)
 {
@@ -34,7 +37,7 @@ int main(int argc,char **argv)
   register_png_file_type();
   get_executable_name(full_path,0x400);
   replace_filename(working_directory,full_path,"",0x400);
-  chdir(working_directory);
+  _chdir(working_directory);
   pcVar5 = logfilename;
   for (iVar4 = 256; iVar4 > 0; iVar4 = iVar4 - 1) {
     *(pcVar5++) = '\0';
@@ -65,7 +68,7 @@ int main(int argc,char **argv)
   log2file("Working directory is:\n   %s",working_directory);
   
   if (!init_game(argc,argv)) {
-    if (dropped_file_is_not_a_replay == 0) {
+    if (!dropped_file_is_not_a_replay) {
       log2file("* Failed to initialize the game *");
       allegro_message("Failed to initialize the game.");
     }
@@ -180,7 +183,8 @@ int main(int argc,char **argv)
           destroy_replay(demo);
         }
         log2file("   opening %s",replay_directory);
-        while (demo = replay_selector(&ctrl,replay_directory), demo != NULL) {
+        demo = replay_selector(&ctrl,replay_directory);
+        while (demo != NULL) {
           fadeOut(0x10);
           stopMenuMusic();
           run_demo((char *)0x0);
@@ -191,6 +195,7 @@ int main(int argc,char **argv)
           if ((bg_menu != NULL) && (options.msc_volume != 0)) {
             play_sample(bg_menu,options.msc_volume,0x80,1000,1);
           }
+          demo = replay_selector(&ctrl,replay_directory);
         }
         menu_params.pos = 4;
         bVar1 = false;
