@@ -5,12 +5,33 @@
 #include <stdio.h>
 #include <direct.h>
 #include <windows.h>
-//#include <allegro.h>
+#include <wingdi.h>
 #define TOWER_VERSION "1.5.1"
 
 int itrcheck;
 char working_directory[1024];
 bool dropped_file_is_not_a_replay;
+
+typedef struct _FONT {
+  void *data;
+  int height;
+  struct FONT_VTABLE *vtable;
+} FONT;
+
+typedef struct _FONT_VTABLE {
+  int (*font_height)(FONT *);
+  int (*char_length)(FONT *, int);
+  int (*text_length)(FONT *, char *);
+  int (*render_char)(FONT *, int, int, int, BITMAP *, int, int);
+  void (*render)(FONT *, char *, int, int, BITMAP *, int, int);
+  void (*destroy)(FONT *);
+  int (*get_font_ranges)(FONT *);
+  int (*get_font_range_begin)(FONT *, int);
+  int (*get_font_range_end)(FONT *, int);
+  FONT * (*extract_font_range)(FONT *, int, int);
+  FONT * (*merge_fonts)(FONT *, FONT *);
+  int (*transpose_font)(FONT *, int);
+} FONT_VTABLE;
 
 void exit_func_00401000(void* func) {
   atexit(func);
@@ -42,7 +63,7 @@ bool init_game(int argc, char** argv) {
 }
 
 void uninit_game() {
-  
+
 }
 
 #define log2file(str, ...)
@@ -80,7 +101,7 @@ int main(int argc,char **argv) {
   }
   get_logfile_path(logfilename,0x100);
   _File = fopen(logfilename,"wt");
-  if (_File != (FILE *)0x0) {
+  if (_File != NULL) {
     fprintf(_File,"Icy Tower v%s - log file\n----------------------------\n",TOWER_VERSION);
     fclose(_File);
   }
@@ -223,7 +244,7 @@ int main(int argc,char **argv) {
         while (demo != NULL) {
           fadeOut(0x10);
           stopMenuMusic();
-          run_demo((char *)0x0);
+          run_demo(NULL);
           fadeOut(0x10);
           main_menu_callback();
           draw_menu(swap_screen,main_menu,&menu_params,0x163,0x11d,0);
