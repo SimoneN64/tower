@@ -32,8 +32,22 @@ void replace_filename(char* cwd, char* dst, char* src, int len) {
   // STUB!!
 }
 
-int main(int argc,char **argv)
-{
+void get_logfile_path(char* filename, int len) {
+  // STUB!!
+}
+
+bool init_game(int argc, char** argv) {
+  // STUB!!
+  return false;
+}
+
+void uninit_game() {
+  
+}
+
+#define log2file(str, ...)
+
+int main(int argc,char **argv) {
   bool bVar1;
   void* pHVar2;
   void* hDebugLibrary;
@@ -92,7 +106,7 @@ int main(int argc,char **argv)
   if (!init_game(argc,argv)) {
     if (!dropped_file_is_not_a_replay) {
       log2file("* Failed to initialize the game *");
-      allegro_message("Failed to initialize the game.");
+      //allegro_message("Failed to initialize the game.");
     }
     log2file("Cleaning up Allegro");
     uninit_game();
