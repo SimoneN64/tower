@@ -8,10 +8,6 @@
 #include <wingdi.h>
 #define TOWER_VERSION "1.5.1"
 
-int itrcheck;
-char working_directory[1024];
-bool dropped_file_is_not_a_replay;
-
 typedef struct _FONT {
   void *data;
   int height;
@@ -32,6 +28,81 @@ typedef struct _FONT_VTABLE {
   FONT * (*merge_fonts)(FONT *, FONT *);
   int (*transpose_font)(FONT *, int);
 } FONT_VTABLE;
+
+typedef struct _Tscroller {
+  int horizontal;
+  char* text;
+  FONT* fnt;
+  int font_height;
+  int width;
+  int height;
+  int offset;
+  int rows;
+  int length;
+  char *lines[512];
+} Tscroller;
+
+typedef struct _DATAFILE_PROPERTY {
+  char* dat;
+  int type;
+} DATAFILE_PROPERTY;
+
+typedef struct _DATAFILE {
+  void* dat;
+  int type;
+  long size;
+  DATAFILE_PROPERTY* prop;
+} DATAFILE;
+
+typedef struct _Tmenu_params {
+  FONT* font;
+  int font_height;
+  Tcontrol ctrl;
+  BITMAP* bullet;
+  int pos;
+  DATAFILE* data;
+  int fo;
+} Tmenu_params;
+
+typedef struct _Treplay {
+  char header[6];
+  int size;
+  char name[32];
+  char date[32];
+  int checksum;
+  int score;
+  int floor;
+  int combo;
+  int no_combo_top_floor;
+  int biggest_lost_combo;
+  int ccc[5];
+  int jc[5];
+  int floor_shrink;
+  int floor_size;
+  int start_speed;
+  int speed_increase;
+  int gravity;
+  int rejump;
+  int random_seed;
+  char comment[42];
+  int tc_posts;
+  float tc_c_data[100];
+  float tc_q_data[100];
+  float tc_t_data[100];
+  float tc_s_data[100];
+  float tc_f_data[100];
+  Trecord* data;
+} Treplay;
+
+int itrcheck;
+char working_directory[1024];
+bool dropped_file_is_not_a_replay;
+Tscroller greeting_scroller;
+DATAFILE* data;
+const char* scroller_greetings = "         Welcome to Icy Tower!     Help Harold the Homeboy to climb as high as possible!       Use arrow keys to move and spacebar to jump.      Good luck!";
+Tmenu_params menu_params;
+bool got_joystick;
+Treplay* demo;
 
 void exit_func_00401000(void* func) {
   atexit(func);
@@ -64,6 +135,53 @@ bool init_game(int argc, char** argv) {
 
 void uninit_game() {
 
+}
+
+void init_scroller(Tscroller* sc, FONT* f, char* t, int w, int h, int horiz) {
+  char cVar1;
+  int iVar2;
+  int i;
+  unsigned int uVar3;
+  char *pcVar4;
+  
+  sc->fnt = f;
+  iVar2 = text_height(f);
+  sc->font_height = iVar2;
+  sc->height = h;
+  sc->horizontal = horiz;
+  sc->text = t;
+  sc->width = w;
+  if (horiz != 0) {
+    iVar2 = text_length(sc->fnt,t);
+    sc->length = iVar2;
+    sc->offset = sc->width;
+    return;
+  }
+  uVar3 = 0xffffffff;
+  pcVar4 = t;
+  do {
+    if (uVar3 == 0) break;
+    uVar3 = uVar3 - 1;
+    cVar1 = *pcVar4;
+    pcVar4 = pcVar4 + 1;
+  } while (cVar1 != '\0');
+  sc->lines[0] = t;
+  sc->rows = 1;
+  if (0 < (int)(~uVar3 - 1)) {
+    iVar2 = 0;
+    while( true ) {
+      if ((t[iVar2] == '\n') && (sc->rows < 0x200)) {
+        sc->lines[sc->rows] = t + iVar2 + 1;
+        sc->rows = sc->rows + 1;
+        sc->text[iVar2] = '\0';
+      }
+      if (~uVar3 - 1 == iVar2 + 1) break;
+      iVar2 = iVar2 + 1;
+      t = sc->text;
+    }
+    h = sc->height;
+  }
+  sc->offset = h;
 }
 
 #define log2file(str, ...)
@@ -143,7 +261,7 @@ int main(int argc,char **argv) {
     menu_params.data = data;
     log2file("Initiating menu controls");
     init_control(&menu_params.ctrl);
-    if (got_joystick != 0) {
+    if (got_joystick) {
       menu_params.ctrl.use_joy = 1;
     }
     log2file("Resetting menu");
