@@ -54,6 +54,18 @@ typedef struct _DATAFILE {
   DATAFILE_PROPERTY* prop;
 } DATAFILE;
 
+typedef struct _Tcontrol {
+  int use_joy;
+  int key_left;
+  int key_right;
+  int key_up;
+  int key_down;
+  int key_fire;
+  int key_enter;
+  int key_pause;
+  unsigned char flags;
+} Tcontrol;
+
 typedef struct _Tmenu_params {
   FONT* font;
   int font_height;
@@ -63,6 +75,11 @@ typedef struct _Tmenu_params {
   DATAFILE* data;
   int fo;
 } Tmenu_params;
+
+typedef struct _Trecord {
+  unsigned char key_flags;
+  int cycle_count;
+} Trecord;
 
 typedef struct _Treplay {
   char header[6];
@@ -94,15 +111,112 @@ typedef struct _Treplay {
   Trecord* data;
 } Treplay;
 
+typedef struct _Tmenu {
+  char caption[128];
+  int return_select;
+  int return_left;
+  int return_right;
+  int flags;
+  void* data;
+} Tmenu;
+
+typedef struct _Toptions {
+  int flash;
+  int checksum;
+  int jump_hold;
+  int full_screen;
+  int floor_shrink;
+  int floor_size;
+  int start_speed;
+  int speed_increase;
+  int gravity;
+  int msc_volume;
+  int snd_volume;
+  int sort_method;
+  char updateDate[16];
+  char posterDate[16];
+  char posterUrl[256];
+  char posterSrc[256];
+  int posterSize;
+  char lastProfile[32];
+  int timesStarted;
+} Toptions;
+
+typedef struct _Tprofile {
+  char header[6];
+  char handle[32];
+  int checksum;
+  int games_played;
+  int custom_games_played;
+  int games_quit;
+  int seconds_spent_playing;
+  int total_floors;
+  int total_score;
+  int total_combos;
+  int total_combo_floors;
+  int best_floor;
+  int best_combo;
+  int best_score;
+  int no_combo_top_floor;
+  int biggest_lost_combo;
+  int cccNum[5];
+  int cccTotal[5];
+  int ccc[5];
+  int jc[5];
+  int rewards[10];
+  int total_jumps;
+  char best_replay_names[32][32];
+  int flash;
+  int jump_hold;
+  char last_avatar[64];
+  int start_floor;
+  int msc_volume;
+  int snd_volume;
+  char creationDate[16];
+  char saveDate[16];
+} Tprofile;
+
+typedef struct _Thisc {
+  char name[32];
+  unsigned int value;
+} Thisc;
+
+typedef struct _Thisc_table {
+  char name[32];
+  Thisc* posts;
+} Thisc_table;
+
+typedef struct _SAMPLE {
+  int bits;
+  int stereo;
+  int freq;
+  int priority;
+  unsigned long len;
+  unsigned long loop_start;
+  unsigned long loop_end;
+  unsigned long param;
+  void* data;
+} SAMPLE;
+
 int itrcheck;
 char working_directory[1024];
+char replay_directory[1024];
 bool dropped_file_is_not_a_replay;
 Tscroller greeting_scroller;
 DATAFILE* data;
 const char* scroller_greetings = "         Welcome to Icy Tower!     Help Harold the Homeboy to climb as high as possible!       Use arrow keys to move and spacebar to jump.      Good luck!";
 Tmenu_params menu_params;
-bool got_joystick;
+bool got_joystick, closeButtonClicked;
+bool is_playing_custom_game;
 Treplay* demo;
+Tmenu main_menu[7];
+Toptions options;
+BITMAP* swap_screen;
+Tprofile* profile;
+Tcontrol ctrl;
+SAMPLE* bg_menu;
+Thisc_table hisc_tables[15];
+char* hisc_names[15];
 
 void exit_func_00401000(void* func) {
   atexit(func);
@@ -135,6 +249,14 @@ bool init_game(int argc, char** argv) {
 
 void uninit_game() {
 
+}
+
+int text_height(FONT* f) {
+  return ((FONT_VTABLE*)(f->vtable))->font_height(f);
+}
+
+int text_length(FONT* f, char* str) {
+  return ((FONT_VTABLE*)(f->vtable))->text_length(f, str);
 }
 
 void init_scroller(Tscroller* sc, FONT* f, char* t, int w, int h, int horiz) {
@@ -182,6 +304,30 @@ void init_scroller(Tscroller* sc, FONT* f, char* t, int w, int h, int horiz) {
     h = sc->height;
   }
   sc->offset = h;
+}
+
+void init_control(Tcontrol* ctrl) {
+
+}
+
+void reset_menu(Tmenu main_menu[7], Tmenu_params* menu_params, int idk) {
+
+}
+
+void run_demo(Treplay* demo) {
+
+}
+
+void allegro_exit() {
+
+}
+
+void main_menu_callback() {
+
+}
+
+Treplay* replay_selector(Tcontrol* ctrl, char* path) {
+
 }
 
 #define log2file(str, ...)
@@ -278,16 +424,16 @@ int main(int argc,char **argv) {
       return 0;
     }
   }
-  load_new_ad_image();
-  startMenuMusic();
+  //load_new_ad_image();
+  //startMenuMusic();
   log2file("\nMAIN MENU LOOP");
-  clear_keybuf();
+  //clear_keybuf();
   if ((options.timesStarted == 1) && (strcmp("guest",options.lastProfile) == 0)) {
-    main_menu_callback();
-    draw_menu(swap_screen,main_menu,&menu_params,0x163,0x11d,0);
-    fadeIn(swap_screen,0x10);
-    force_create_profile();
-    syncOptionsFromProfile();
+    //main_menu_callback();
+    //draw_menu(swap_screen,main_menu,&menu_params,355,285,0);
+    //fadeIn(swap_screen,0x10);
+    //force_create_profile();
+    //syncOptionsFromProfile();
     bVar1 = false;
   }
   else {
@@ -295,15 +441,15 @@ int main(int argc,char **argv) {
   }
   options.msc_volume = profile->msc_volume;
   options.snd_volume = profile->snd_volume;
-  if (closeButtonClicked == 0) {
+  if (!closeButtonClicked) {
     do {
-      main_menu_callback();
-      draw_menu(swap_screen,main_menu,&menu_params,0x163,0x11d,0);
+      //main_menu_callback();
+      //draw_menu(swap_screen,main_menu,&menu_params,355,285,0);
       if (bVar1) {
-        fadeIn(swap_screen,0x10);
+        //fadeIn(swap_screen,0x10);
       }
       else {
-        blit_to_screen(swap_screen);
+        //blit_to_screen(swap_screen);
       }
       full_path[4] = '\0';
       full_path[5] = '\0';
@@ -313,75 +459,75 @@ int main(int argc,char **argv) {
       full_path[1] = '\x01';
       full_path[2] = '\0';
       full_path[3] = '\0';
-      iVar4 = handle_menu(main_menu,&menu_params,&ctrl,swap_screen,main_menu_callback,0x163,0x11d,0);
+      //iVar4 = handle_menu(main_menu,&menu_params,&ctrl,swap_screen,main_menu_callback,0x163,0x11d,0);
       if ((iVar4 == 0x65) || (iVar4 == 0x85)) {
         log2file(" new game selected");
         is_playing_custom_game = (int)(iVar4 != 0x65);
-        fadeOut(0x10);
-        stopMenuMusic();
+        //fadeOut(0x10);
+        //stopMenuMusic();
         do {
           if (demo != NULL) {
-            destroy_replay(demo);
+            //destroy_replay(demo);
           }
           demo = NULL;
-          iVar3 = new_game();
+          //iVar3 = new_game();
           if (iVar3 == 0) {
-            fadeOut(0x10);
+            //fadeOut(0x10);
             break;
           }
-          iVar3 = play();
-          end_game();
-          fadeOut(0x10);
+          //iVar3 = play();
+          //end_game();
+          //fadeOut(0x10);
         } while (iVar3 != 0);
         if (bg_menu != NULL) {
-          play_sample(bg_menu,options.msc_volume,0x80,1000,1);
+          //play_sample(bg_menu,options.msc_volume,0x80,1000,1);
         }
         menu_params.pos = 0;
         bVar1 = true;
       }
       else if (iVar4 == 0x69) {
         log2file(" high scores selected");
-        view_scores(hisc_tables,hisc_names);
+        //view_scores(hisc_tables,hisc_names);
         menu_params.pos = 3;
         bVar1 = false;
       }
       else if (iVar4 == 0x68) {
         log2file(" instructions selected");
-        fadeOut(0x10);
-        show_instructions();
+        //fadeOut(0x10);
+        //show_instructions();
         menu_params.pos = 1;
         bVar1 = true;
       }
       else if (iVar4 == 0x7a) {
         log2file(" load replay selected");
         if (demo != NULL) {
-          destroy_replay(demo);
+          //destroy_replay(demo);
         }
         log2file("   opening %s",replay_directory);
         demo = replay_selector(&ctrl,replay_directory);
         while (demo != NULL) {
-          fadeOut(0x10);
-          stopMenuMusic();
+          //fadeOut(0x10);
+          //stopMenuMusic();
           run_demo(NULL);
-          fadeOut(0x10);
+          //fadeOut(0x10);
           main_menu_callback();
-          draw_menu(swap_screen,main_menu,&menu_params,0x163,0x11d,0);
-          fadeIn(swap_screen,0x20);
+          //draw_menu(swap_screen,main_menu,&menu_params,0x163,0x11d,0);
+          //fadeIn(swap_screen,0x20);
           if ((bg_menu != NULL) && (options.msc_volume != 0)) {
-            play_sample(bg_menu,options.msc_volume,0x80,1000,1);
+            //play_sample(bg_menu,options.msc_volume,0x80,1000,1);
           }
           demo = replay_selector(&ctrl,replay_directory);
         }
         menu_params.pos = 4;
         bVar1 = false;
       }
-      rest(2);
-    } while ((closeButtonClicked == 0) && (iVar4 != 0x6b));
+      //rest(2);
+    } while ((!closeButtonClicked) && (iVar4 != 0x6b));
   }
-  fadeOut(0x10);
+  //fadeOut(0x10);
   log2file("\nShowing credits");
-  show_credits();
-  stopMenuMusic();
+  //show_credits();
+  //stopMenuMusic();
   uninit_game();
   log2file("\nDone...");
   return 0;
