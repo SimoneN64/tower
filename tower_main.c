@@ -54,6 +54,162 @@ typedef struct _DATAFILE {
   DATAFILE_PROPERTY* prop;
 } DATAFILE;
 
+typedef struct _RGB {
+  unsigned char r;
+  unsigned char g;
+  unsigned char b;
+  unsigned char filler;
+} RGB;
+
+typedef struct _V3D {
+  float x;
+  float y;
+  float z;
+  float u;
+  float v;
+  int c;
+} V3D;
+
+typedef struct _V3D_f {
+  float x;
+  float y;
+  float z;
+  float u;
+  float v;
+  int c;
+} V3D_f;
+
+typedef struct _GFX_MODE {
+  int width;
+  int height;
+  int bpp;
+} GFX_MODE;
+
+typedef struct _RLE_SPRITE {
+  int w;
+  int h;
+  int color_depth;
+  int size;
+} RLE_SPRITE;
+
+typedef struct _FONT_GLYPH {
+  short w;
+  short h;
+} FONT_GLYPH;
+
+typedef struct _GFX_VTABLE {
+  int color_depth;
+  int mask_color;
+  void *unwrite_bank;
+  void (*set_clip)(BITMAP *);
+  void (*acquire)(BITMAP *);
+  void (*release)(BITMAP *);
+  BITMAP * (*create_sub_bitmap)(BITMAP *, int, int, int, int);
+  void (*created_sub_bitmap)(BITMAP *, BITMAP *);
+  int (*getpixel)(BITMAP *, int, int);
+  void (*putpixel)(BITMAP *, int, int, int);
+  void (*vline)(BITMAP *, int, int, int, int);
+  void (*hline)(BITMAP *, int, int, int, int);
+  void (*hfill)(BITMAP *, int, int, int, int);
+  void (*line)(BITMAP *, int, int, int, int, int);
+  void (*fastline)(BITMAP *, int, int, int, int, int);
+  void (*rectfill)(BITMAP *, int, int, int, int, int);
+  void (*triangle)(BITMAP *, int, int, int, int, int, int, int);
+  void (*draw_sprite)(BITMAP *, BITMAP *, int, int);
+  void (*draw_256_sprite)(BITMAP *, BITMAP *, int, int);
+  void (*draw_sprite_v_flip)(BITMAP *, BITMAP *, int, int);
+  void (*draw_sprite_h_flip)(BITMAP *, BITMAP *, int, int);
+  void (*draw_sprite_vh_flip)(BITMAP *, BITMAP *, int, int);
+  void (*draw_trans_sprite)(BITMAP *, BITMAP *, int, int);
+  void (*draw_trans_rgba_sprite)(BITMAP *, BITMAP *, int, int);
+  void (*draw_lit_sprite)(BITMAP *, BITMAP *, int, int, int);
+  void (*draw_rle_sprite)(BITMAP *, RLE_SPRITE *, int, int);
+  void (*draw_trans_rle_sprite)(BITMAP *, RLE_SPRITE *, int, int);
+  void (*draw_trans_rgba_rle_sprite)(BITMAP *, RLE_SPRITE *, int, int);
+  void (*draw_lit_rle_sprite)(BITMAP *, RLE_SPRITE *, int, int, int);
+  void (*draw_character)(BITMAP *, BITMAP *, int, int, int, int);
+  void (*draw_glyph)(BITMAP *, FONT_GLYPH *, int, int, int, int);
+  void (*blit_from_memory)(BITMAP *, BITMAP *, int, int, int, int, int, int);
+  void (*blit_to_memory)(BITMAP *, BITMAP *, int, int, int, int, int, int);
+  void (*blit_from_system)(BITMAP *, BITMAP *, int, int, int, int, int, int);
+  void (*blit_to_system)(BITMAP *, BITMAP *, int, int, int, int, int, int);
+  void (*blit_to_self)(BITMAP *, BITMAP *, int, int, int, int, int, int);
+  void (*blit_to_self_forward)(BITMAP *, BITMAP *, int, int, int, int, int, int);
+  void (*blit_to_self_backward)(BITMAP *, BITMAP *, int, int, int, int, int, int);
+  void (*blit_between_formats)(BITMAP *, BITMAP *, int, int, int, int, int, int);
+  void (*masked_blit)(BITMAP *, BITMAP *, int, int, int, int, int, int);
+  void (*clear_to_color)(BITMAP *, int);
+  void (*pivot_scaled_sprite_flip)(BITMAP *, BITMAP *, float, float, float, float, float, float, int);
+  void (*do_stretch_blit)(BITMAP *, BITMAP *, int, int, int, int, int, int, int, int, int);
+  void (*draw_gouraud_sprite)(BITMAP *, BITMAP *, int, int, int, int, int, int);
+  void (*draw_sprite_end)(void);
+  void (*blit_end)(void);
+  void (*polygon)(BITMAP *, int, int *, int);
+  void (*rect)(BITMAP *, int, int, int, int, int);
+  void (*circle)(BITMAP *, int, int, int, int);
+  void (*circlefill)(BITMAP *, int, int, int, int);
+  void (*ellipse)(BITMAP *, int, int, int, int, int);
+  void (*ellipsefill)(BITMAP *, int, int, int, int, int);
+  void (*arc)(BITMAP *, int, int, float, float, int, int);
+  void (*spline)(BITMAP *, int *, int);
+  void (*floodfill)(BITMAP *, int, int, int);
+  void (*polygon3d)(BITMAP *, int, BITMAP *, int, V3D **);
+  void (*polygon3d_f)(BITMAP *, int, BITMAP *, int, V3D_f **);
+  void (*triangle3d)(BITMAP *, int, BITMAP *, V3D *, V3D *, V3D *);
+  void (*triangle3d_f)(BITMAP *, int, BITMAP *, V3D_f *, V3D_f *, V3D_f *);
+  void (*quad3d)(BITMAP *, int, BITMAP *, V3D *, V3D *, V3D *, V3D *);
+  void (*quad3d_f)(BITMAP *, int, BITMAP *, V3D_f *, V3D_f *, V3D_f *, V3D_f *);
+  void (*draw_sprite_ex)(BITMAP *, BITMAP *, int, int, int, int);
+} GFX_VTABLE;
+
+typedef struct P_DRIVER_INFO {
+  int id;
+  void* driver;
+  int autodetect;
+} _DRIVER_INFO;
+
+typedef struct _SYSTEM_DRIVER {
+  int id;
+  char *name;
+  char *desc;
+  char *ascii_name;
+  int (*init)(void);
+  void (*exit)(void);
+  void (*get_executable_name)(char *, int);
+  int (*find_resource)(char *, char *, int);
+  void (*set_window_title)(char *);
+  int (*set_close_button_callback)(void (*)(void));
+  void (*message)(char *);
+  void (*assert)(char *);
+  void (*save_console_state)(void);
+  void (*restore_console_state)(void);
+  BITMAP * (*create_bitmap)(int, int, int);
+  void (*created_bitmap)(BITMAP *);
+  BITMAP * (*create_sub_bitmap)(BITMAP *, int, int, int, int);
+  void (*created_sub_bitmap)(BITMAP *, BITMAP *);
+  int (*destroy_bitmap)(BITMAP *);
+  void (*read_hardware_palette)(void);
+  void (*set_palette_range)(RGB *, int, int, int);
+  GFX_VTABLE * (*get_vtable)(int);
+  int (*set_display_switch_mode)(int);
+  void (*display_switch_lock)(int, int);
+  int (*desktop_color_depth)(void);
+  int (*get_desktop_resolution)(int *, int *);
+  void (*get_gfx_safe_mode)(int *, GFX_MODE *);
+  void (*yield_timeslice)(void);
+  void * (*create_mutex)(void);
+  void (*destroy_mutex)(void *);
+  void (*lock_mutex)(void *);
+  void (*unlock_mutex)(void *);
+  _DRIVER_INFO * (*gfx_drivers)(void);
+  _DRIVER_INFO * (*digi_drivers)(void);
+  _DRIVER_INFO * (*midi_drivers)(void);
+  _DRIVER_INFO * (*keyboard_drivers)(void);
+  _DRIVER_INFO * (*mouse_drivers)(void);
+  _DRIVER_INFO * (*joystick_drivers)(void);
+  _DRIVER_INFO * (*timer_drivers)(void);
+} SYSTEM_DRIVER;
+
 typedef struct _Tcontrol {
   int use_joy;
   int key_left;
@@ -217,21 +373,26 @@ Tcontrol ctrl;
 SAMPLE* bg_menu;
 Thisc_table hisc_tables[15];
 char* hisc_names[15];
+SYSTEM_DRIVER* system_driver;
+int (*usetc)(char*, int);
 
 void exit_func_00401000(void* func) {
   atexit(func);
 }
 
-void _install_allegro_version_check(int a, int* b, void* c, int d) {
-  // STUB!!
-}
-
-void register_png_file_type() {
-  // STUB!!
-}
-
 void get_executable_name(char* dst, int len) {
-  // STUB!!
+  int iVar1;
+  int iVar2;
+  
+  if (system_driver->get_executable_name != NULL) {
+    /* WARNING: Could not recover jumptable at 0x0043ee0b. Too many branches */
+    /* WARNING: Treating indirect jump as call */
+    (*system_driver->get_executable_name)(dst,len);
+    return;
+  }
+  iVar1 = (*usetc)(dst,0x2e);
+  iVar2 = (*usetc)(dst + iVar1,0x2f);
+  (*usetc)(dst + iVar1 + iVar2,0);
 }
 
 void replace_filename(char* cwd, char* dst, char* src, int len) {
@@ -354,8 +515,8 @@ int main(int argc,char **argv) {
     printf("No exception handler present, RPTs will not be generated");
   }
   errno_ptr = _errno();
-  _install_allegro_version_check(0,errno_ptr,exit_func_00401000,0x40401);
-  register_png_file_type();
+  //_install_allegro_version_check(0,errno_ptr,exit_func_00401000,0x40401);
+  //register_png_file_type();
   get_executable_name(full_path,0x400);
   replace_filename(working_directory,full_path,"",0x400);
   _chdir(working_directory);
