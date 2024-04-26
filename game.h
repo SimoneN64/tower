@@ -1,0 +1,259 @@
+//
+// Created by simone on 4/26/24.
+//
+
+#pragma once
+#define TOWER_VERSION "1.5.1"
+#include "gfx.h"
+#include "driver.h"
+
+typedef struct _Tbeta {
+  char email[128];
+  char name[128];
+  char code[16];
+  struct _Tbeta* next;
+} Tbeta;
+
+typedef struct _Tscroller {
+  int horizontal;
+  char* text;
+  FONT* fnt;
+  int font_height;
+  int width;
+  int height;
+  int offset;
+  int rows;
+  int length;
+  char *lines[512];
+} Tscroller;
+
+
+typedef struct _Tcontrol {
+  int use_joy;
+  int key_left;
+  int key_right;
+  int key_up;
+  int key_down;
+  int key_fire;
+  int key_enter;
+  int key_pause;
+  unsigned char flags;
+} Tcontrol;
+
+typedef struct _DATAFILE_PROPERTY {
+  char* dat;
+  int type;
+} DATAFILE_PROPERTY;
+
+typedef struct _DATAFILE {
+  void* dat;
+  int type;
+  long size;
+  DATAFILE_PROPERTY* prop;
+} DATAFILE;
+
+typedef struct _SAMPLE {
+  int bits;
+  int stereo;
+  int freq;
+  int priority;
+  unsigned long len;
+  unsigned long loop_start;
+  unsigned long loop_end;
+  unsigned long param;
+  void* data;
+} SAMPLE;
+
+typedef struct _Tmenu_params {
+  FONT* font;
+  int font_height;
+  Tcontrol ctrl;
+  BITMAP* bullet;
+  int pos;
+  DATAFILE* data;
+  int fo;
+} Tmenu_params;
+
+typedef struct _Trecord {
+  unsigned char key_flags;
+  int cycle_count;
+} Trecord;
+
+typedef struct _Treplay {
+  char header[6];
+  int size;
+  char name[32];
+  char date[32];
+  int checksum;
+  int score;
+  int floor;
+  int combo;
+  int no_combo_top_floor;
+  int biggest_lost_combo;
+  int ccc[5];
+  int jc[5];
+  int floor_shrink;
+  int floor_size;
+  int start_speed;
+  int speed_increase;
+  int gravity;
+  int rejump;
+  int random_seed;
+  char comment[42];
+  int tc_posts;
+  float tc_c_data[100];
+  float tc_q_data[100];
+  float tc_t_data[100];
+  float tc_s_data[100];
+  float tc_f_data[100];
+  Trecord* data;
+} Treplay;
+
+typedef struct _Tmenu {
+  char caption[128];
+  int return_select;
+  int return_left;
+  int return_right;
+  int flags;
+  void* data;
+} Tmenu;
+
+typedef struct _Toptions {
+  int flash;
+  int checksum;
+  int jump_hold;
+  int full_screen;
+  int floor_shrink;
+  int floor_size;
+  int start_speed;
+  int speed_increase;
+  int gravity;
+  int msc_volume;
+  int snd_volume;
+  int sort_method;
+  char updateDate[16];
+  char posterDate[16];
+  char posterUrl[256];
+  char posterSrc[256];
+  int posterSize;
+  char lastProfile[32];
+  int timesStarted;
+} Toptions;
+
+typedef struct _Tprofile {
+  char header[6];
+  char handle[32];
+  int checksum;
+  int games_played;
+  int custom_games_played;
+  int games_quit;
+  int seconds_spent_playing;
+  int total_floors;
+  int total_score;
+  int total_combos;
+  int total_combo_floors;
+  int best_floor;
+  int best_combo;
+  int best_score;
+  int no_combo_top_floor;
+  int biggest_lost_combo;
+  int cccNum[5];
+  int cccTotal[5];
+  int ccc[5];
+  int jc[5];
+  int rewards[10];
+  int total_jumps;
+  char best_replay_names[32][32];
+  int flash;
+  int jump_hold;
+  char last_avatar[64];
+  int start_floor;
+  int msc_volume;
+  int snd_volume;
+  char creationDate[16];
+  char saveDate[16];
+} Tprofile;
+
+typedef struct _Thisc {
+  char name[32];
+  unsigned int value;
+} Thisc;
+
+typedef struct _Thisc_table {
+  char name[32];
+  Thisc* posts;
+} Thisc_table;
+
+typedef struct _Tgamepad {
+  int up,down,left,right;
+  int b[32];
+} Tgamepad;
+
+typedef RGB PALETTE[256];
+
+typedef struct _Tmenu_char_selection {
+  int value,max;
+  BITMAP* bmp;
+  PALETTE pal;
+} Tmenu_char_selection;
+
+typedef struct _Tmenu_selection {
+  int value,size;
+  char* caption[32];
+} Tmenu_selection;
+
+typedef struct _Tcommandline {
+  int jumps,combos,sd,keys,tiny;
+} Tcommandline;
+
+typedef struct _Tplayer {
+  double x,y,sx,sy,max_s;
+  int level,score,best_combo,status,jump_key,frame,in_combo,acc_level,acc_jumps,dead,rotate;
+  float angle;
+  int edge,edge_drawn,bounce,shake,latest_combo,show_combo,no_combo_top_floor,biggest_lost_combo,ccc[5],jcTop[5],jc[5];
+} Tplayer;
+
+typedef struct _LZSS_PACK_DATA {
+  int state,i,c,len,r,s,last_match_length,code_buf_ptr;
+  unsigned char mask;
+  char code_buf[17];
+  int match_position,match_length;
+  int lson[4097], rson[4353], dad[4097];
+  unsigned char text_buf[4113];
+} LZSS_PACK_DATA;
+
+typedef struct _LZSS_UNPACK_DATA {
+  int state,i,j,k,r,c,flags;
+  unsigned char text_buf[4113];
+} LZSS_UNPACK_DATA;
+
+typedef struct __al_normal_packfile_details {
+  int hndl,flags;
+  unsigned char* buf_pos;
+  int buf_size;
+  long todo;
+  struct PACKFILE* parent;
+  LZSS_PACK_DATA* pack_data;
+  LZSS_UNPACK_DATA* unpack_data;
+  char* filename, *passdata, *passpos;
+  unsigned char buf[4096];
+}_al_normal_packfile_details;
+
+typedef struct _PACKFILE_VTABLE {
+  int (*pf_fclose)();
+  int (*pf_getc)();
+  int (*pf_ungetc)(int, void*);
+  int (*pf_fread)(void*, long, void*);
+  int (*pf_putc)(int, void*);
+  int (*pf_fwrite)(void*, long, void*);
+  int (*pf_fseek)(void*, int);
+  int (*pf_feof)(void*);
+  int (*pf_ferror)(void*);
+} PACKFILE_VTABLE;
+
+typedef struct _PACKFILE {
+  PACKFILE_VTABLE* vtable;
+  void* userdata;
+  bool is_normal_packfile;
+  _al_normal_packfile_details normal;
+} PACKFILE;
