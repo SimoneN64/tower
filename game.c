@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <sys/stat.h>
 
 int itrcheck;
 char working_directory[1024];
@@ -34,8 +36,6 @@ Tmenu_char_selection play_char;
 Tmenu_selection eyecandy_selection,scroll_speed_selection,floor_size_selection,gravity_selection;
 Tcommandline cmdline;
 
-#define log2file(str, ...)
-
 Thisc_table * make_hisc_table(char *name) {
   Thisc_table *res;
   Thisc *pTVar1;
@@ -59,6 +59,140 @@ void reset_hisc_table(Thisc_table *table,char *name,int hi,int lo) {
     strcpy(table->posts->name + i,name);
     *(int *)(table->posts->name + i + 32) = 0;
   }
+}
+
+uint64_t file_size_ex(char *filename) {
+  char *pcVar1;
+  PACKFILE *f_00;
+  PACKFILE *f;
+  int iVar2;
+  long ret;
+  uint64_t uVar3;
+
+  pcVar1 = strchr(filename,35);
+  if (pcVar1 != NULL) {
+    f_00 = pack_fopen_special_file(filename,"r");
+    if (f_00 != NULL) {
+      iVar2 = (f_00->normal).todo;
+      pack_fclose(f_00);
+      return (uint64_t)iVar2;
+    }
+  }
+
+  struct stat s;
+  stat(filename, &s);
+  return s.st_size;
+}
+
+void reset_options(Toptions *o) {
+  uint64_t uVar5;
+
+  o->flash = 0;
+  o->full_screen = 0;
+  o->jump_hold = 1;
+  o->msc_volume = 0x96;
+  o->snd_volume = 0x96;
+  o->floor_shrink = 1;
+  o->speed_increase = 1;
+  o->start_speed = 5;
+  o->floor_size = 1;
+  o->gravity = 1;
+  o->timesStarted = 0;
+  o->sort_method = 1;
+  o->updateDate[0] = 0;
+  strncpy(o->updateDate, "2001-12-22", 11);
+  *(int *)o->lastProfile = 0x73657567;
+  *(short *)(o->lastProfile + 4) = 0x74;
+  o->posterDate[0] = 0;
+  strncpy(o->posterDate, "1111-22-33", 11);
+  o->posterUrl[0] = 0;
+  strncpy(o->posterUrl, "http://www.freelunchdesign.com/?src=it14_game", 46);
+  o->posterSrc[0] = 0;
+  strncpy(o->posterSrc, "default.dat", 12);
+  uVar5 = file_size_ex("data/com/default.dat");
+  o->posterSize = (int)uVar5;
+}
+
+int generate_options_checksum(Toptions *o) {
+  uint cs = 0;
+  int j;
+  int values [11];
+
+  j = o->flash;
+  values[1] = o->full_screen;
+  values[2] = o->jump_hold;
+  values[3] = o->msc_volume;
+  values[4] = o->snd_volume;
+  values[5] = o->floor_size;
+  values[6] = o->floor_shrink;
+  values[7] = o->gravity;
+  values[8] = o->start_speed;
+  values[9] = o->speed_increase;
+  values[10] = o->posterSize;
+
+  for(int i = 0; i < 0xb; i++) {
+    cs += (j + i) * 0x11;
+    j = values[i];
+  }
+
+  for(int i = 0; i < 8; i++) {
+    cs += (int) o->updateDate[i];
+  }
+
+  for(int i = 0; i < 16; i++) {
+    cs += (int)o->posterDate[i] + (int)o->updateDate[i];
+  }
+
+  for(int i = 0; i < 256; i++) {
+    cs += (int)o->posterSrc[i] + (int)o->posterUrl[i];
+  }
+
+  cs = (cs ^ 0x3d ^ cs >> 0x10) * 9;
+  cs = (cs >> 4 ^ cs) * 0x27d4eb2d;
+  return cs >> 0xf ^ cs;
+}
+
+void load_options(Toptions *o,PACKFILE *fp) {
+  int iVar1;
+  int cs;
+
+  pack_fread(o,0x278,fp);
+  iVar1 = generate_options_checksum(o);
+  if (iVar1 != o->checksum) {
+    reset_options(o);
+  }
+  set_sort_method(o->sort_method);
+}
+
+int load_hisc_table(Thisc_table *table,PACKFILE *fp) {
+  char cVar1;
+  uint uVar2;
+  int c_real;
+  char *s;
+  char *pcVar3;
+  Thisc *pTVar5;
+  int local_30;
+  uint local_20 [4];
+
+  pTVar5 = table->posts;
+  local_30 = 1;
+  for(int i = 0; i < 180; i += 36) {
+    pack_fread(pTVar5->name + i,36,fp);
+    pack_fread(local_20,4,fp);
+    pTVar5 = table->posts;
+    pcVar3 = pTVar5->name + i;
+    uVar2 = *(uint *)(pcVar3 + 32);
+    cVar1 = *pcVar3;
+    while (cVar1 != '\0') {
+      uVar2 = (int)cVar1 + uVar2 * 140;
+      cVar1 = *++pcVar3;
+    }
+    if (local_20[0] != uVar2) {
+      local_30 = 0;
+    }
+  }
+
+  return local_30;
 }
 
 int init_game(int argc, char** argv) {
@@ -104,8 +238,8 @@ int init_game(int argc, char** argv) {
     (*system_driver->set_window_title)(title);
   }
   /*lpWSAData = (LPWSADATA)&wsaData;
-  iVar3 = _WSAStartup@8(0x202,lpWSAData);
-  if (iVar3 != 0) {
+  i = _WSAStartup@8(0x202,lpWSAData);
+  if (i != 0) {
     log2file(" !!! Failed to setup Winsock");
   }
   pWVar9 = (LPWSADATA)(wsaData._0_4_ & 0xff);
@@ -267,14 +401,14 @@ int init_game(int argc, char** argv) {
   }
   if (itrcheck != 0) goto LAB_0040f1dc;
   options.timesStarted = options.timesStarted + 1;
-  iVar3 = options.timesStarted;
+  i = options.timesStarted;
   log2file("Game started %d times",options.timesStarted);
   if (system_driver->desktop_color_depth != NULL) {
     depth = system_driver->desktop_color_depth();
   }
   set_color_depth(depth);
   if (options.full_screen == 0) {
-    log2file("Setting windowed mode 640x480",iVar3);
+    log2file("Setting windowed mode 640x480",i);
     if (set_gfx_mode(2,640,480,0,0) < 0) {
       log2file(" *** failed");
       options.full_screen = -1;
@@ -285,7 +419,7 @@ int init_game(int argc, char** argv) {
   }
   else {
     LAB_0040ed10:
-    log2file("Setting fullscreen mode 640x480",iVar3);
+    log2file("Setting fullscreen mode 640x480",i);
     if (set_gfx_mode(1,640,480,0,0) < 0) {
       log2file(" *** failed")
       printf("Failed to set graphics mode.");
@@ -307,8 +441,8 @@ int init_game(int argc, char** argv) {
     show_mouse(screen);
   }
   log2file("Graphics mode set. (screen = %d)",screen);
-  iVar3 = makecol(180,180,180);
-  textprintf_centre_ex(screen,font,320,220,iVar3,-1,"please wait");
+  i = makecol(180,180,180);
+  textprintf_centre_ex(screen,font,320,220,i,-1,"please wait");
   set_color_conversion(0);
   packfile_password("(c) Free Lunch Design");
   dat = load_datafile("data/loading.dat");
@@ -322,15 +456,15 @@ int init_game(int argc, char** argv) {
   log2file("Putting FLD Logo on screen");
   pBVar1 = (BITMAP *)dat[1].dat;
   select_palette((RGB *)dat->dat);
-  iVar3 = makecol(255,255,255);
-  (*screen->vtable->clear_to_color)(screen,iVar3);
-  iVar3 = 200 - pBVar1->h / 2;
+  i = makecol(255,255,255);
+  (*screen->vtable->clear_to_color)(screen,i);
+  i = 200 - pBVar1->h / 2;
   iVar13 = 320 - pBVar1->w / 2;
   if (pBVar1->vtable->color_depth == 8) {
-    (*screen->vtable->draw_256_sprite)(screen,pBVar1,iVar13,iVar3);
+    (*screen->vtable->draw_256_sprite)(screen,pBVar1,iVar13,i);
   }
   else {
-    (*screen->vtable->draw_sprite)(screen,pBVar1,iVar13,iVar3);
+    (*screen->vtable->draw_sprite)(screen,pBVar1,iVar13,i);
   }
   unload_datafile(dat);
   log2file("Setting focus modes");
@@ -357,16 +491,16 @@ int init_game(int argc, char** argv) {
   install_sound(-1,-1,NULL);
   log2file("Installing joystick/gamepad");
   draw_progress_bar();
-  iVar3 = install_joystick(-1);
-  got_joystick = (int)(iVar3 == 0);
-  if (iVar3 == 0) {
+  i = install_joystick(-1);
+  got_joystick = (int)(i == 0);
+  if (got_joystick) {
     ctrl.use_joy = 1;
-    iVar3 = joy[0].num_buttons;
+    i = joy[0].num_buttons;
     log2file(" gamepad has %d buttons",joy[0].num_buttons);
     iVar13 = exists("gamepad.txt");
     if (iVar13 == 0) {
       pTVar6 = get_gamepad();
-      log2file(" gamepad.txt is missing, setting defaults",iVar3);
+      log2file(" gamepad.txt is missing, setting defaults",i);
       pTVar6->up = 4;
       pTVar6->left = 1;
       pTVar6->right = 2;
@@ -377,7 +511,7 @@ int init_game(int argc, char** argv) {
     }
     else {
       pTVar6 = get_gamepad();
-      log2file(" getting values from gamepad.txt",iVar3);
+      log2file(" getting values from gamepad.txt",i);
       set_config_file("gamepad.txt");
       pTVar6->up = get_gamepad_value("up");
       pTVar6->left = get_gamepad_value("left");
@@ -417,14 +551,14 @@ int init_game(int argc, char** argv) {
   LAB_0040f1dc:
   log2file("Initiating player");
   draw_progress_bar();
-  iVar3 = rand();
-  player_id = iVar3 % 1000;
+  i = rand();
+  player_id = i % 1000;
   pTVar7 = (Tplayer *)malloc(184);
-  ply[iVar3 % 1000] = pTVar7;
+  ply[i % 1000] = pTVar7;
   if (ply[player_id] == NULL) {
     log2file(" *** failed")
     printf("Failed to allocate memory for player.");
-    iVar3 = 0;
+    i = 0;
   }
   else {
     if (itrcheck == 0) {
@@ -435,12 +569,12 @@ int init_game(int argc, char** argv) {
       gameover_bmp = (BITMAP *)data[0x37].dat;
       log2file("Checking profile directory");
       get_profiles_dir(buf,0x400);
-      iVar3 = file_exists(buf,-1,NULL);
-      if (iVar3 == 0) {
+      i = file_exists(buf,-1,NULL);
+      if (i == 0) {
         log2file("  does not exist, trying to create");
         _mkdir(buf);
-        iVar3 = file_exists(buf,-1,NULL);
-        if (iVar3 == 0) {
+        i = file_exists(buf,-1,NULL);
+        if (i == 0) {
           log2file("  *** failed!")
           printf("Failed to create profile directory %s",buf);
           return 0;
@@ -473,8 +607,8 @@ int init_game(int argc, char** argv) {
       syncOptionsFromProfile();
       log2file("Checking available characters");
       draw_progress_bar();
-      iVar3 = check_characters();
-      if (iVar3 == 0) {
+      i = check_characters();
+      if (i == 0) {
         log2file(" *** no characters available")
         printf(
             "No characters available.\nPlease reinstall game or add custom characters.\nR efer to readme.txt."
@@ -491,7 +625,7 @@ int init_game(int argc, char** argv) {
         log2file(" could not load data/sfx15.dat");
         pcVar8 = "no sound";
         pcVar10 = sfx_file;
-        for (iVar3 = 9; iVar3 > 0; iVar3 -= 1) {
+        for (i = 9; i > 0; i--) {
           *pcVar10 = *pcVar8;
           pcVar8++;
           pcVar10++;
@@ -501,7 +635,7 @@ int init_game(int argc, char** argv) {
       else {
         pcVar8 = "sfx15.dat";
         pcVar10 = sfx_file;
-        for (iVar3 = 10; iVar3 != 0; iVar3 = iVar3 + -1) {
+        for (i = 10; i != 0; i--) {
           *pcVar10 = *pcVar8;
           pcVar8 = pcVar8 + 1;
           pcVar10 = pcVar10 + 1;
@@ -575,25 +709,25 @@ int init_game(int argc, char** argv) {
       draw_progress_bar();
       log2file("Welcome to Icy Tower");
       draw_progress_bar();
-      iVar3 = 0;
+      i = 0;
       while ((iVar13 = keypressed(), iVar13 == 0 && (cycle_count < 0x96))) {
-        if ((cycle_count % 10 == 0) && (bVar11 = cycle_count != iVar3, iVar3 = cycle_count, bVar11)) {
+        if ((cycle_count % 10 == 0) && (bVar11 = cycle_count != i, i = cycle_count, bVar11)) {
           draw_progress_bar();
-          iVar3 = cycle_count;
+          i = cycle_count;
         }
         rest(2);
       }
-      iVar3 = rand();
-      seed = (double)(iVar3 % 2367);
+      i = rand();
+      seed = (double)(i % 2367);
       fadeOut(16);
       clear_bitmap(screen);
       vsync();
       clear_keybuf();
     }
     init_ok = 1;
-    iVar3 = -1;
+    i = -1;
   }
-  return iVar3;
+  return i;
 }
 
 void uninit_game() {

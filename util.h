@@ -10,3 +10,6 @@ void get_executable_name(char* dst, int len);
 int get_logfile_path(char* filename, int len);
 int text_height(FONT* f);
 int text_length(FONT* f, char* str);
+void get_configfile_path(char* cfgfilename, int len);
+int get_sort_method();
+void set_sort_method(int sm);

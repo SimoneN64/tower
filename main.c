@@ -9,6 +9,9 @@
 //#include <windows.h>
 //#include <wingdi.h>
 #include "game.h"
+#include "util.h"
+#include <unistd.h>
+#include <errno.h>
 
 void exit_func_00401000(void* func) {
   atexit(func);
@@ -19,7 +22,7 @@ int main(int argc,char **argv) {
   void* pHVar2;
   void* hDebugLibrary;
   int *errno_ptr;
-  FILE *_File;
+  FILE *logfile;
   int iVar3;
   int iVar4;
   int ret;
@@ -31,25 +34,25 @@ int main(int argc,char **argv) {
   char full_path [1024];
   char logfilename [256];
   
-  pHVar2 = LoadLibraryA("exchndl.dll");
+  /*pHVar2 = LoadLibraryA("exchndl.dll");
   if (pHVar2 == NULL) {
     printf("No exception handler present, RPTs will not be generated");
-  }
-  errno_ptr = _errno();
+  }*/
+  errno_ptr = &errno;
   //_install_allegro_version_check(0,errno_ptr,exit_func_00401000,0x40401);
   //register_png_file_type();
   get_executable_name(full_path,0x400);
   replace_filename(working_directory,full_path,"",0x400);
-  _chdir(working_directory);
+  chdir(working_directory);
   pcVar5 = logfilename;
   for (iVar4 = 256; iVar4 > 0; iVar4 = iVar4 - 1) {
     *(pcVar5++) = '\0';
   }
   get_logfile_path(logfilename,0x100);
-  _File = fopen(logfilename,"wt");
-  if (_File != NULL) {
-    fprintf(_File,"Icy Tower v%s - log file\n----------------------------\n",TOWER_VERSION);
-    fclose(_File);
+  logfile = fopen(logfilename,"wt");
+  if (logfile != NULL) {
+    fprintf(logfile,"Icy Tower v%s - log file\n----------------------------\n",TOWER_VERSION);
+    fclose(logfile);
   }
   if (argc < 1) {
     log2file("Game started with the following commands:");
@@ -100,7 +103,7 @@ int main(int argc,char **argv) {
     run_demo(NULL);
     if (itrcheck != 0) {
       log2file("Exiting Allegro");
-      allegro_exit();
+      //allegro_exit();
       log2file("\nDone...");
                     /* WARNING: Subroutine does not return */
       return 0;

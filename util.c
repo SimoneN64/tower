@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include "gfx.h"
+#include "game.h"
 
 char the_password[256]={0};
 
@@ -116,4 +117,16 @@ int text_height(FONT* f) {
 
 int text_length(FONT* f, char* str) {
   return ((FONT_VTABLE*)(f->vtable))->text_length(f, str);
+}
+
+void get_configfile_path(char* cfgfilename, int len) {
+  strncpy(cfgfilename, "tower.cfg", len);
+}
+
+int get_sort_method() {
+  return sort_method;
+}
+
+void set_sort_method(int sm) {
+  sort_method = sm;
 }

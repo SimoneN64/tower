@@ -7,6 +7,7 @@
 #include "gfx.h"
 #include "driver.h"
 #include <stdbool.h>
+#include <bits/stdint-uintn.h>
 
 typedef struct Tbeta {
   char email[128];
@@ -269,3 +270,35 @@ void run_demo(Treplay* demo);
 void main_menu_callback();
 Treplay* replay_selector(Tcontrol* ctrl, char* path);
 void init_scroller(Tscroller* sc, FONT* f, char* t, int w, int h, int horiz);
+void reset_options(Toptions *o);
+int generate_options_checksum(Toptions *o);
+uint64_t file_size_ex(char *filename);
+int load_hisc_table(Thisc_table *table,PACKFILE *fp);
+#define log2file(str, ...)
+
+extern int itrcheck;
+extern int sort_method;
+extern char working_directory[1024];
+extern char replay_directory[1024];
+extern bool dropped_file_is_not_a_replay;
+extern Tscroller greeting_scroller;
+extern DATAFILE* data;
+extern const char* scroller_greetings;
+extern Tmenu_params menu_params;
+extern bool got_joystick, closeButtonClicked;
+extern bool is_playing_custom_game;
+extern Treplay* demo;
+extern Tmenu main_menu[7];
+extern Toptions options;
+extern BITMAP* swap_screen;
+extern bool init_ok;
+extern Tprofile* profile;
+extern Tcontrol ctrl;
+extern SAMPLE* bg_menu;
+extern Thisc_table* hisc_tables[15];
+extern char* hisc_names[15];
+extern SYSTEM_DRIVER* system_driver;
+extern int (*usetc)(char*, int);
+extern Tmenu_char_selection play_char;
+extern Tmenu_selection eyecandy_selection,scroll_speed_selection,floor_size_selection,gravity_selection;
+extern Tcommandline cmdline;
