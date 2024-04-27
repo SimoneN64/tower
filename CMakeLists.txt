@@ -4,6 +4,9 @@ project(tower C)
 set(CMAKE_C_STANDARD 11)
 
 add_executable(tower
-  tower_main.c
+  main.c
   driver.h
-  game.h)
+  game.h
+  game.c
+  util.h
+  util.c)

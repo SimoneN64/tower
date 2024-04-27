@@ -6,15 +6,16 @@
 #define TOWER_VERSION "1.5.1"
 #include "gfx.h"
 #include "driver.h"
+#include <stdbool.h>
 
-typedef struct _Tbeta {
+typedef struct Tbeta {
   char email[128];
   char name[128];
   char code[16];
-  struct _Tbeta* next;
+  struct Tbeta* next;
 } Tbeta;
 
-typedef struct _Tscroller {
+typedef struct Tscroller {
   int horizontal;
   char* text;
   FONT* fnt;
@@ -28,7 +29,7 @@ typedef struct _Tscroller {
 } Tscroller;
 
 
-typedef struct _Tcontrol {
+typedef struct Tcontrol {
   int use_joy;
   int key_left;
   int key_right;
@@ -40,19 +41,19 @@ typedef struct _Tcontrol {
   unsigned char flags;
 } Tcontrol;
 
-typedef struct _DATAFILE_PROPERTY {
+typedef struct DATAFILE_PROPERTY {
   char* dat;
   int type;
 } DATAFILE_PROPERTY;
 
-typedef struct _DATAFILE {
+typedef struct DATAFILE {
   void* dat;
   int type;
   long size;
   DATAFILE_PROPERTY* prop;
 } DATAFILE;
 
-typedef struct _SAMPLE {
+typedef struct SAMPLE {
   int bits;
   int stereo;
   int freq;
@@ -64,7 +65,7 @@ typedef struct _SAMPLE {
   void* data;
 } SAMPLE;
 
-typedef struct _Tmenu_params {
+typedef struct Tmenu_params {
   FONT* font;
   int font_height;
   Tcontrol ctrl;
@@ -74,12 +75,12 @@ typedef struct _Tmenu_params {
   int fo;
 } Tmenu_params;
 
-typedef struct _Trecord {
+typedef struct Trecord {
   unsigned char key_flags;
   int cycle_count;
 } Trecord;
 
-typedef struct _Treplay {
+typedef struct Treplay {
   char header[6];
   int size;
   char name[32];
@@ -109,7 +110,7 @@ typedef struct _Treplay {
   Trecord* data;
 } Treplay;
 
-typedef struct _Tmenu {
+typedef struct Tmenu {
   char caption[128];
   int return_select;
   int return_left;
@@ -118,7 +119,7 @@ typedef struct _Tmenu {
   void* data;
 } Tmenu;
 
-typedef struct _Toptions {
+typedef struct Toptions {
   int flash;
   int checksum;
   int jump_hold;
@@ -140,7 +141,7 @@ typedef struct _Toptions {
   int timesStarted;
 } Toptions;
 
-typedef struct _Tprofile {
+typedef struct Tprofile {
   char header[6];
   char handle[32];
   int checksum;
@@ -174,46 +175,46 @@ typedef struct _Tprofile {
   char saveDate[16];
 } Tprofile;
 
-typedef struct _Thisc {
+typedef struct Thisc {
   char name[32];
   unsigned int value;
 } Thisc;
 
-typedef struct _Thisc_table {
+typedef struct Thisc_table {
   char name[32];
   Thisc* posts;
 } Thisc_table;
 
-typedef struct _Tgamepad {
+typedef struct Tgamepad {
   int up,down,left,right;
   int b[32];
 } Tgamepad;
 
 typedef RGB PALETTE[256];
 
-typedef struct _Tmenu_char_selection {
+typedef struct Tmenu_char_selection {
   int value,max;
   BITMAP* bmp;
   PALETTE pal;
 } Tmenu_char_selection;
 
-typedef struct _Tmenu_selection {
+typedef struct Tmenu_selection {
   int value,size;
   char* caption[32];
 } Tmenu_selection;
 
-typedef struct _Tcommandline {
+typedef struct Tcommandline {
   int jumps,combos,sd,keys,tiny;
 } Tcommandline;
 
-typedef struct _Tplayer {
+typedef struct Tplayer {
   double x,y,sx,sy,max_s;
   int level,score,best_combo,status,jump_key,frame,in_combo,acc_level,acc_jumps,dead,rotate;
   float angle;
   int edge,edge_drawn,bounce,shake,latest_combo,show_combo,no_combo_top_floor,biggest_lost_combo,ccc[5],jcTop[5],jc[5];
 } Tplayer;
 
-typedef struct _LZSS_PACK_DATA {
+typedef struct LZSS_PACK_DATA {
   int state,i,c,len,r,s,last_match_length,code_buf_ptr;
   unsigned char mask;
   char code_buf[17];
@@ -222,12 +223,12 @@ typedef struct _LZSS_PACK_DATA {
   unsigned char text_buf[4113];
 } LZSS_PACK_DATA;
 
-typedef struct _LZSS_UNPACK_DATA {
+typedef struct LZSS_UNPACK_DATA {
   int state,i,j,k,r,c,flags;
   unsigned char text_buf[4113];
 } LZSS_UNPACK_DATA;
 
-typedef struct __al_normal_packfile_details {
+typedef struct al_normal_packfile_details {
   int hndl,flags;
   unsigned char* buf_pos;
   int buf_size;
@@ -237,9 +238,9 @@ typedef struct __al_normal_packfile_details {
   LZSS_UNPACK_DATA* unpack_data;
   char* filename, *passdata, *passpos;
   unsigned char buf[4096];
-}_al_normal_packfile_details;
+} al_normal_packfile_details;
 
-typedef struct _PACKFILE_VTABLE {
+typedef struct PACKFILE_VTABLE {
   int (*pf_fclose)();
   int (*pf_getc)();
   int (*pf_ungetc)(int, void*);
@@ -251,9 +252,20 @@ typedef struct _PACKFILE_VTABLE {
   int (*pf_ferror)(void*);
 } PACKFILE_VTABLE;
 
-typedef struct _PACKFILE {
+typedef struct PACKFILE {
   PACKFILE_VTABLE* vtable;
   void* userdata;
   bool is_normal_packfile;
-  _al_normal_packfile_details normal;
+  al_normal_packfile_details normal;
 } PACKFILE;
+
+void init_control(Tcontrol* ctrl);
+Thisc_table * make_hisc_table(char *name);
+void reset_hisc_table(Thisc_table *table,char *name,int hi,int lo);
+int init_game(int argc, char** argv);
+void uninit_game();
+void reset_menu(Tmenu main_menu[7], Tmenu_params* menu_params, int idk);
+void run_demo(Treplay* demo);
+void main_menu_callback();
+Treplay* replay_selector(Tcontrol* ctrl, char* path);
+void init_scroller(Tscroller* sc, FONT* f, char* t, int w, int h, int horiz);
