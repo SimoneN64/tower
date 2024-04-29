@@ -7,7 +7,7 @@
 #include "gfx.h"
 #include "driver.h"
 #include <stdbool.h>
-#include <bits/stdint-uintn.h>
+#include <stdint.h>
 
 typedef struct Tbeta {
   char email[128];

@@ -6,7 +6,7 @@
 
 typedef struct _BITMAP {
   int w,h,clip,cl,cr,ct,cb;
-  struct GFX_VTABLE* vtable;
+  struct _GFX_VTABLE* vtable;
   void* write_bank, *read_bank, *dat;
   unsigned long id;
   void* extra;
@@ -58,7 +58,7 @@ typedef struct _FONT_GLYPH {
 typedef struct _FONT {
   void *data;
   int height;
-  struct FONT_VTABLE *vtable;
+  struct _FONT_VTABLE *vtable;
 } FONT;
 
 typedef struct _FONT_VTABLE {

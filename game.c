@@ -114,7 +114,7 @@ void reset_options(Toptions *o) {
 }
 
 int generate_options_checksum(Toptions *o) {
-  uint cs = 0;
+  unsigned int cs = 0;
   int j;
   int values [11];
 
@@ -166,13 +166,13 @@ void load_options(Toptions *o,PACKFILE *fp) {
 
 int load_hisc_table(Thisc_table *table,PACKFILE *fp) {
   char cVar1;
-  uint uVar2;
+  unsigned int uVar2;
   int c_real;
   char *s;
   char *pcVar3;
   Thisc *pTVar5;
   int local_30;
-  uint local_20 [4];
+  unsigned int local_20 [4];
 
   pTVar5 = table->posts;
   local_30 = 1;
@@ -181,7 +181,7 @@ int load_hisc_table(Thisc_table *table,PACKFILE *fp) {
     pack_fread(local_20,4,fp);
     pTVar5 = table->posts;
     pcVar3 = pTVar5->name + i;
-    uVar2 = *(uint *)(pcVar3 + 32);
+    uVar2 = *(unsigned int *)(pcVar3 + 32);
     cVar1 = *pcVar3;
     while (cVar1 != '\0') {
       uVar2 = (int)cVar1 + uVar2 * 140;
@@ -245,7 +245,7 @@ int init_game(int argc, char** argv) {
   pWVar9 = (LPWSADATA)(wsaData._0_4_ & 0xff);
   if (((byte)wsaData._0_4_ < 2) || (SUB41(wsaData._0_4_,1) < 2)) {
     log2file(" !!! Failed to get proper Winsock version (wanted 2.2, got %d.%d)",pWVar9,
-             (uint)SUB41(wsaData._0_4_,1));
+             (unsigned int)SUB41(wsaData._0_4_,1));
     lpWSAData = pWVar9;
   }*/
   play_char.max = 0;
