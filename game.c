@@ -893,16 +893,61 @@ void init_scroller(Tscroller* sc, FONT* f, char* t, int w, int h, int horiz) {
   sc->offset = h;
 }
 
-void init_control(Tcontrol* ctrl) {
-
+void init_control(Tcontrol* c) {
+  c->key_up = 0x54;
+  c->key_down = 0x55;
+  c->key_left = 0x52;
+  c->key_right = 0x53;
+  c->key_fire = 0x4b;
+  c->key_enter = 0x43;
+  c->key_pause = 0x10;
+  c->flags = 0;
+  c->use_joy = 0;
 }
 
-void reset_menu(Tmenu main_menu[7], Tmenu_params* menu_params, int idk) {
+void reset_menu(Tmenu main_menu[7], Tmenu_params* menu_params, int sel_pos) {
+  int theight;
+  Tmenu *pMainMenu = main_menu;
 
+  do {
+    pMainMenu->flags &= 0xfffffffe;
+    pMainMenu++;
+  } while ((char)pMainMenu->flags > -1);
+  main_menu[sel_pos].flags = main_menu[sel_pos].flags | 1;
+  theight = text_height(menu_params->font);
+  menu_params->font_height = theight;
 }
 
-void run_demo(Treplay* demo) {
+void run_demo(char* filename) {
+  bool gameStartedSuccesfully;
+  int startFloor;
+  
+  if (filename != NULL) {
+    if (demo != NULL) {
+      destroy_replay(demo);
+    }
+    demo = load_replay(filename);
+  }
+  if (demo != NULL) {
+    if (itrcheck == 0) {
+      startFloor = profile->start_floor;
+      profile->start_floor = 0;
+      gameStartedSuccesfully = new_game();
+    }
+    else {
+      startFloor = 0;
+      gameStartedSuccesfully = new_game();
+    }
 
+    if (gameStartedSuccesfully) {
+      play();
+      end_game();
+    }
+    if (itrcheck == 0) {
+      profile->start_floor = startFloor;
+      floors.value = startFloor;
+    }
+  }
 }
 
 void main_menu_callback() {

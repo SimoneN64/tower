@@ -102,16 +102,16 @@ int main(int argc,char **argv) {
       return 0;
     }
   }
-  //load_new_ad_image();
-  //startMenuMusic();
+  load_new_ad_image();
+  startMenuMusic();
   log2file("\nMAIN MENU LOOP");
   clear_keybuf();
   if ((options.timesStarted == 1) && (strcmp("guest",options.lastProfile) == 0)) {
-    //main_menu_callback();
-    //draw_menu(swap_screen,main_menu,&menu_params,355,285,0);
-    //fadeIn(swap_screen,0x10);
-    //force_create_profile();
-    //syncOptionsFromProfile();
+    main_menu_callback();
+    draw_menu(swap_screen,main_menu,&menu_params,355,285,0);
+    fadeIn(swap_screen,0x10);
+    force_create_profile();
+    syncOptionsFromProfile();
     bVar1 = false;
   }
   else {
@@ -121,13 +121,13 @@ int main(int argc,char **argv) {
   options.snd_volume = profile->snd_volume;
   if (!closeButtonClicked) {
     do {
-      //main_menu_callback();
-      //draw_menu(swap_screen,main_menu,&menu_params,355,285,0);
+      main_menu_callback();
+      draw_menu(swap_screen,main_menu,&menu_params,355,285,0);
       if (bVar1) {
-        //fadeIn(swap_screen,0x10);
+        fadeIn(swap_screen,0x10);
       }
       else {
-        //blit_to_screen(swap_screen);
+        blit_to_screen(swap_screen);
       }
       full_path[4] = '\0';
       full_path[5] = '\0';
@@ -137,62 +137,62 @@ int main(int argc,char **argv) {
       full_path[1] = '\x01';
       full_path[2] = '\0';
       full_path[3] = '\0';
-      //iVar4 = handle_menu(main_menu,&menu_params,&ctrl,swap_screen,main_menu_callback,0x163,0x11d,0);
+      iVar4 = handle_menu(main_menu,&menu_params,&ctrl,swap_screen,main_menu_callback,0x163,0x11d,0);
       if ((iVar4 == 0x65) || (iVar4 == 0x85)) {
         log2file(" new game selected");
         is_playing_custom_game = (int)(iVar4 != 0x65);
-        //fadeOut(0x10);
-        //stopMenuMusic();
+        fadeOut(0x10);
+        stopMenuMusic();
         do {
           if (demo != NULL) {
-            //destroy_replay(demo);
+            destroy_replay(demo);
           }
           demo = NULL;
-          //iVar3 = new_game();
+          iVar3 = new_game();
           if (iVar3 == 0) {
-            //fadeOut(0x10);
+            fadeOut(0x10);
             break;
           }
-          //iVar3 = play();
-          //end_game();
-          //fadeOut(0x10);
+          iVar3 = play();
+          end_game();
+          fadeOut(0x10);
         } while (iVar3 != 0);
         if (bg_menu != NULL) {
-          //play_sample(bg_menu,options.msc_volume,0x80,1000,1);
+          play_sample(bg_menu,options.msc_volume,0x80,1000,1);
         }
         menu_params.pos = 0;
         bVar1 = true;
       }
       else if (iVar4 == 0x69) {
         log2file(" high scores selected");
-        //view_scores(hisc_tables,hisc_names);
+        view_scores(hisc_tables,hisc_names);
         menu_params.pos = 3;
         bVar1 = false;
       }
       else if (iVar4 == 0x68) {
         log2file(" instructions selected");
-        //fadeOut(0x10);
-        //show_instructions();
+        fadeOut(0x10);
+        show_instructions();
         menu_params.pos = 1;
         bVar1 = true;
       }
       else if (iVar4 == 0x7a) {
         log2file(" load replay selected");
         if (demo != NULL) {
-          //destroy_replay(demo);
+          destroy_replay(demo);
         }
         log2file("   opening %s",replay_directory);
         demo = replay_selector(&ctrl,replay_directory);
         while (demo != NULL) {
-          //fadeOut(0x10);
-          //stopMenuMusic();
+          fadeOut(0x10);
+          stopMenuMusic();
           run_demo(NULL);
-          //fadeOut(0x10);
+          fadeOut(0x10);
           main_menu_callback();
-          //draw_menu(swap_screen,main_menu,&menu_params,0x163,0x11d,0);
-          //fadeIn(swap_screen,0x20);
+          draw_menu(swap_screen,main_menu,&menu_params,0x163,0x11d,0);
+          fadeIn(swap_screen,0x20);
           if ((bg_menu != NULL) && (options.msc_volume != 0)) {
-            //play_sample(bg_menu,options.msc_volume,0x80,1000,1);
+            play_sample(bg_menu,options.msc_volume,0x80,1000,1);
           }
           demo = replay_selector(&ctrl,replay_directory);
         }
@@ -202,10 +202,10 @@ int main(int argc,char **argv) {
       rest(2);
     } while ((!closeButtonClicked) && (iVar4 != 0x6b));
   }
-  //fadeOut(0x10);
+  fadeOut(0x10);
   log2file("\nShowing credits");
-  //show_credits();
-  //stopMenuMusic();
+  show_credits();
+  stopMenuMusic();
   uninit_game();
   log2file("\nDone...");
   return 0;

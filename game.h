@@ -211,7 +211,7 @@ void reset_hisc_table(Thisc_table *table,char *name,int hi,int lo);
 int init_game(int argc, char** argv);
 void uninit_game();
 void reset_menu(Tmenu main_menu[7], Tmenu_params* menu_params, int idk);
-void run_demo(Treplay* demo);
+void run_demo(char* filename);
 void main_menu_callback();
 Treplay* replay_selector(Tcontrol* ctrl, char* path);
 void init_scroller(Tscroller* sc, FONT* f, char* t, int w, int h, int horiz);
