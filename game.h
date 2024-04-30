@@ -218,6 +218,11 @@ void init_scroller(Tscroller* sc, FONT* f, char* t, int w, int h, int horiz);
 void reset_options(Toptions *o);
 int generate_options_checksum(Toptions *o);
 int load_hisc_table(Thisc_table *table,PACKFILE *fp);
+void clickedCloseButton(void);
+void switchedToProgram(void);
+void switchedFromProgram(void);
+void datafile_callback(DATAFILE *d);
+void datafile_callback_slow(DATAFILE *d);
 #define log2file(str, ...)
 
 extern int itrcheck;
@@ -229,7 +234,7 @@ extern Tscroller greeting_scroller;
 extern DATAFILE* data;
 extern const char* scroller_greetings;
 extern Tmenu_params menu_params;
-extern bool got_joystick, closeButtonClicked;
+extern bool got_joystick, closeButtonClicked, hasFocus;
 extern bool is_playing_custom_game;
 extern Treplay* demo;
 extern Tmenu main_menu[7];
@@ -267,3 +272,4 @@ extern int seed;
 extern Tcharacter* characters;
 extern Tbeta* testers;
 extern int num_chars;
+extern int progress_count;

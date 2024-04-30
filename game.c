@@ -19,7 +19,7 @@ Tscroller greeting_scroller;
 DATAFILE* data;
 const char* scroller_greetings = "         Welcome to Icy Tower!     Help Harold the Homeboy to climb as high as possible!       Use arrow keys to move and spacebar to jump.      Good luck!";
 Tmenu_params menu_params;
-bool got_joystick, closeButtonClicked;
+bool got_joystick, closeButtonClicked, hasFocus;
 bool is_playing_custom_game;
 Treplay* demo;
 Tmenu main_menu[7];
@@ -57,6 +57,7 @@ int seed;
 Tcharacter* characters;
 Tbeta* testers;
 int num_chars;
+int progress_count = 0;
 
 Thisc_table * make_hisc_table(char *name) {
   Thisc_table *res;
@@ -192,6 +193,34 @@ int load_hisc_table(Thisc_table *table,PACKFILE *fp) {
   }
 
   return local_30;
+}
+
+void datafile_callback(DATAFILE *d) {
+  draw_progress_bar();
+  return;
+}
+
+void datafile_callback_slow(DATAFILE *d) {
+  if ((progress_count & 0xfU) == 0) {
+    draw_progress_bar();
+  }
+  progress_count++;
+  return;
+}
+
+void clickedCloseButton(void) {
+  closeButtonClicked = true;
+  return;
+}
+
+void switchedToProgram(void) {
+  hasFocus = true;
+  return;
+}
+
+void switchedFromProgram(void) {
+  hasFocus = false;
+  return;
 }
 
 int init_game(int argc, char** argv) {
