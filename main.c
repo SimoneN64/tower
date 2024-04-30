@@ -5,9 +5,6 @@
 #include <stdio.h>
 #include <time.h>
 #include <assert.h>
-//#include <direct.h>
-//#include <windows.h>
-//#include <wingdi.h>
 #include "game.h"
 #include "util.h"
 #include <unistd.h>

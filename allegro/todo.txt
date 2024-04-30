@@ -1,0 +1,133 @@
+---------------------------------------------------------------------------
+This is the public TODO list for the Allegro Game/Multimedia Library.
+---------------------------------------------------------------------------
+
+Updates or comments can be sent to the TODO list maintainer Peter Wang
+<tjaden@alphalink.com.au> or to the Allegro developer's mailinglist
+<conductors@canvaslink.com>, preferrably with the text [TODO] in the subject.
+
+
+General (Platform independant) todos:
+---------------------------------------------------------------------------
+
+- find solution or API to timer/multithread problem
+- don't use BITMAPs for zbuffers
+- Unified color conversion routines for all windowed gfx drivers (now
+  that we have a Mac port, it's a total of 4 possible windowed drivers,
+  and the need of an unified set of window updating routines is stronger)
+- check and/or fix compilation with gcc 3.0
+- include dat2c once finished
+- remove joystick control from main part of setup
+- configure --disable-constructor doesn't work because of part of alconfig.h
+
+DOS todos:
+---------------------------------------------------------------------------
+
+- Write an unified Sidewinder driver
+
+Win32 todos:
+---------------------------------------------------------------------------
+
+- DirectInput 5 joystick driver
+- Find a solution to the C-to-asm calling problem with BC++
+- Fix restoring problem after waking up from stand-by mode
+- Make Allegro return focus to the calling app
+- Fix 'IE bars popup over a fullscreen DirectX window' bug
+- Investigate mouse problem with USB Wacom Tablet (bug #226445)
+
+Linux todos:
+---------------------------------------------------------------------------
+
+- fix fb 24-bit scrolling (allegro presuming padding?)
+- memory leaks in ljoy.c (search for malloc)
+- make spec file work with older rpms, e.g. from RedHat 6.0
+  They don't like lines in %files section starting with non-`/'.
+- awaiting svgalib folks to provide an atexit-free vga_init
+- some problems with display switching
+  [see AD thread "fbcon backgrounding" 2001-11-28 for symptoms]
+- ALSA driver should try different parameters when it cannot set the
+  parameters it wants the first time, ie. because the sound card is crap
+
+X11 todos:
+---------------------------------------------------------------------------
+
+- remove `dga_mouse' config var when appropriate (newer servers have fixed
+  the bug this works around).  Wait until XF86 4.0 propagated..
+- speed up X11 driver (use asm colour conversion routines, for one)
+- key[] should not be internationalised (e.g. KEY_S should always be set
+  for the key two to the right of CapsLock).  If we can't solve this in
+  time, include bukinm's xkeymap program.
+- play nice with WindowMaker (there's no appicon, for one)
+- ufixicon (generate src file that when linked, automatically sets icon)
+- problem with mouse and keyboard events [fixed?]
+
+Unix todos:
+---------------------------------------------------------------------------
+
+- "still PIC-related problems with X lib, waiting for XFree people"
+  [fixed in newer distros?]
+- makeinfo should be detected and be optional
+
+Macintosh todos:
+---------------------------------------------------------------------------
+
+- implement os_version & os_revision.
+- implement fetch_mode_list() for fullscreen mode
+- don't use argv or argc on main function, now this not work.
+- don't use printf, stdout, stderr, stdin function related use allegro_message.
+- allegro_message truncates message to 254 chars.
+- low resolutions like 320x200 doesn't fill the entire screen.
+- missing features include: hardware accelleration, virtual screens,
+  scrolling, joystick, switching, windowed modes, true 16 & 32 bpp
+  colordepths.
+- fix midi playback.
+- Update the docs.
+- Window close button?
+
+BeOS todos:
+---------------------------------------------------------------------------
+
+- Write a safe windowed driver using BBitmap
+- Launching programs from the Be menu still doesn't work (Tracker works though)
+
+QNX todos:
+---------------------------------------------------------------------------
+
+- Investigate synchronization problems
+- Video bitmaps and acceleration support in fullscreen mode
+- Display switching in fullscreen mode
+- Use standard Unix build system (autoconf, etc.) if possible
+
+Wishlist:
+---------------------------------------------------------------------------
+
+- OSS MIDI pitch bend is wrong
+- size_t where appropriate (get more opinions first)
+- keyboard set_rate
+- make zipwin.sh work with cygwin.
+
+Wishlist: (definitely post 4.0)
+---------------------------------------------------------------------------
+
+- More hardware accelerated functions? Trans/lit sprites come to mind.
+- framebuffer hardware accel via XFB or DirectFB (?) library/driver
+- Better get_config_text support, with multiple fallback configuration
+  files (you can have lot's of them under linux), which is not supported at
+  the moment (IIRC two at most).
+- Split setup in two: user program and configuration library. This would
+  allow easier merge process of configuration program into real user
+  programs, as well as modifying the interface and "look'n'feel". The lib
+  should be written in such a way to support future additions without the
+  need of rewritting the user setup ui.
+- Play with switch_in/out X events, just for the sake of it :-)
+- hook function to handle window resizing
+- DirectMusic 6 MIDI driver
+- Add caching system to speed up filename#object and load_datafile_object()
+- Video overlay gfx driver under QNX
+- rewrite set_gfx_mode
+- more modularity under Linux
+- XVideo driver under XFree86
+- simplify linux input subsystem (it's much more complicated than necessary)
+- Add support for more versatile sub-bitmap objects
+
+---------------------------------------------------------------------------

@@ -5,7 +5,7 @@
 #pragma once
 #define TOWER_VERSION "1.5.1"
 #include "gfx.h"
-#include "driver.h"
+#include "allegro/include/allegro.h"
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -41,30 +41,6 @@ typedef struct Tcontrol {
   int key_pause;
   unsigned char flags;
 } Tcontrol;
-
-typedef struct DATAFILE_PROPERTY {
-  char* dat;
-  int type;
-} DATAFILE_PROPERTY;
-
-typedef struct DATAFILE {
-  void* dat;
-  int type;
-  long size;
-  DATAFILE_PROPERTY* prop;
-} DATAFILE;
-
-typedef struct SAMPLE {
-  int bits;
-  int stereo;
-  int freq;
-  int priority;
-  unsigned long len;
-  unsigned long loop_start;
-  unsigned long loop_end;
-  unsigned long param;
-  void* data;
-} SAMPLE;
 
 typedef struct Tmenu_params {
   FONT* font;
@@ -191,8 +167,6 @@ typedef struct Tgamepad {
   int b[32];
 } Tgamepad;
 
-typedef RGB PALETTE[256];
-
 typedef struct Tmenu_char_selection {
   int value,max;
   BITMAP* bmp;
@@ -214,51 +188,6 @@ typedef struct Tplayer {
   float angle;
   int edge,edge_drawn,bounce,shake,latest_combo,show_combo,no_combo_top_floor,biggest_lost_combo,ccc[5],jcTop[5],jc[5];
 } Tplayer;
-
-typedef struct LZSS_PACK_DATA {
-  int state,i,c,len,r,s,last_match_length,code_buf_ptr;
-  unsigned char mask;
-  char code_buf[17];
-  int match_position,match_length;
-  int lson[4097], rson[4353], dad[4097];
-  unsigned char text_buf[4113];
-} LZSS_PACK_DATA;
-
-typedef struct LZSS_UNPACK_DATA {
-  int state,i,j,k,r,c,flags;
-  unsigned char text_buf[4113];
-} LZSS_UNPACK_DATA;
-
-typedef struct al_normal_packfile_details {
-  int hndl,flags;
-  unsigned char* buf_pos;
-  int buf_size;
-  long todo;
-  struct PACKFILE* parent;
-  LZSS_PACK_DATA* pack_data;
-  LZSS_UNPACK_DATA* unpack_data;
-  char* filename, *passdata, *passpos;
-  unsigned char buf[4096];
-} al_normal_packfile_details;
-
-typedef struct PACKFILE_VTABLE {
-  int (*pf_fclose)();
-  int (*pf_getc)();
-  int (*pf_ungetc)(int, void*);
-  int (*pf_fread)(void*, long, void*);
-  int (*pf_putc)(int, void*);
-  int (*pf_fwrite)(void*, long, void*);
-  int (*pf_fseek)(void*, int);
-  int (*pf_feof)(void*);
-  int (*pf_ferror)(void*);
-} PACKFILE_VTABLE;
-
-typedef struct PACKFILE {
-  PACKFILE_VTABLE* vtable;
-  void* userdata;
-  bool is_normal_packfile;
-  al_normal_packfile_details normal;
-} PACKFILE;
 
 void init_control(Tcontrol* ctrl);
 Thisc_table * make_hisc_table(char *name);
