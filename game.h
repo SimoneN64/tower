@@ -178,9 +178,25 @@ typedef struct Tmenu_selection {
   char* caption[32];
 } Tmenu_selection;
 
+typedef struct Tmenu_slider {
+  int value,min,max,step;
+} Tmenu_slider;
+
+typedef struct Tmenu_floor_selection {
+  int value,max;
+} Tmenu_floor_selection;
+
 typedef struct Tcommandline {
   int jumps,combos,sd,keys,tiny;
 } Tcommandline;
+
+typedef struct Tcharacter {
+  char filename[1024];
+  BITMAP* bmp;
+  bool ok, uses_datafile;
+  char name[128];
+  PALETTE pal;
+} Tcharacter;
 
 typedef struct Tplayer {
   double x,y,sx,sy,max_s;
@@ -230,3 +246,24 @@ extern int (*usetc)(char*, int);
 extern Tmenu_char_selection play_char;
 extern Tmenu_selection eyecandy_selection,scroll_speed_selection,floor_size_selection,gravity_selection;
 extern Tcommandline cmdline;
+extern int cycle_count;
+extern bool window;
+extern char init_string[7];
+extern int player_id;
+extern Tplayer* ply[1000];
+extern BITMAP* gameover_bmp;
+extern DATAFILE* sfx;
+extern char sfx_file[512];
+extern SAMPLE* combo_sound[10];
+extern SAMPLE* speaker[3];
+extern SAMPLE* sounds[9];
+extern SAMPLE* menu_sounds[2];
+extern SAMPLE* jump_sound[3];
+extern SAMPLE* bg_beat;
+extern SAMPLE* bg_menu;
+extern Tmenu_slider snd_volume_slider,msc_volume_slider,eyecandy_selection,gravity_selection,floor_size_selection,scroll_speed_selection;
+extern Tmenu_floor_selection floors;
+extern int seed;
+extern Tcharacter* characters;
+extern Tbeta* testers;
+extern int num_chars;

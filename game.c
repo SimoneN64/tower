@@ -37,6 +37,26 @@ Tmenu_char_selection play_char;
 Tmenu_selection eyecandy_selection,scroll_speed_selection,floor_size_selection,gravity_selection;
 Tcommandline cmdline;
 bool window;
+int cycle_count;
+char init_string[7] = "qyuj}h";
+int player_id;
+Tplayer* ply[1000];
+BITMAP* gameover_bmp;
+DATAFILE* sfx;
+char sfx_file[512];
+SAMPLE* combo_sound[10];
+SAMPLE* speaker[3];
+SAMPLE* sounds[9];
+SAMPLE* menu_sounds[2];
+SAMPLE* jump_sound[3];
+SAMPLE* bg_beat;
+SAMPLE* bg_menu;
+Tmenu_slider snd_volume_slider,msc_volume_slider,eyecandy_selection,gravity_selection,floor_size_selection,scroll_speed_selection;
+Tmenu_floor_selection floors;
+int seed;
+Tcharacter* characters;
+Tbeta* testers;
+int num_chars;
 
 Thisc_table * make_hisc_table(char *name) {
   Thisc_table *res;
@@ -629,16 +649,7 @@ int init_game(int argc, char** argv) {
         combo_sound[2] = getSampleFromOggDatafile(sfx,9);
         combo_sound[3] = getSampleFromOggDatafile(sfx,0x11);
         combo_sound[4] = getSampleFromOggDatafile(sfx,0x15);
-        buf[0] = '\x01';
-        buf[1] = '\0';
-        buf[2] = '\0';
-        buf[3] = '\0';
         combo_sound[5] = getSampleFromOggDatafile(sfx,1);
-        buf._4_4_ = sfx;
-        buf[0] = '~';
-        buf[1] = -6;
-        buf[2] = '@';
-        buf[3] = '\0';
         combo_sound[6] = getSampleFromOggDatafile(sfx,5);
         combo_sound[7] = getSampleFromOggDatafile(sfx,6);
         combo_sound[8] = getSampleFromOggDatafile(sfx,0xf);
@@ -648,8 +659,12 @@ int init_game(int argc, char** argv) {
         speaker[0] = getSampleFromOggDatafile(sfx,10);
         speaker[1] = getSampleFromOggDatafile(sfx,7);
         speaker[2] = getSampleFromOggDatafile(sfx,0x13);
+        sounds[0] = NULL;
+        sounds[1] = NULL;
         sounds[2] = getSampleFromOggDatafile(sfx,0);
+        sounds[3] = NULL;
         sounds[4] = getSampleFromOggDatafile(sfx,0xd);
+        sounds[5] = NULL;
         sounds[6] = getSampleFromOggDatafile(sfx,0xe);
         sounds[7] = getSampleFromOggDatafile(sfx,4);
         sounds[8] = getSampleFromOggDatafile(sfx,0x10);
@@ -658,10 +673,6 @@ int init_game(int argc, char** argv) {
         jump_sound[0] = NULL;
         jump_sound[1] = NULL;
         jump_sound[2] = NULL;
-        sounds[0] = NULL;
-        sounds[1] = NULL;
-        sounds[3] = NULL;
-        sounds[5] = NULL;
         log2file("Releasing ogg datafile.");
         unload_datafile(sfx);
         sfx = NULL;
@@ -771,20 +782,16 @@ void uninit_game() {
     destroy_sample(bg_menu);
   }
   log2file("Freeing custom character memory");
-  _Memory = characters;
-  if (0 < num_chars) {
-    iVar2 = 0;
-    iVar1 = 0;
-    do {
-      if (*(BITMAP * *)(_Memory->name + iVar2 + -8) != NULL) {
-        destroy_bitmap(*(BITMAP * *)(_Memory->name + iVar2 + -8));
-        _Memory = characters;
+  
+  if (characters) {
+    for(iVar1 = 0, iVar2 = 0; iVar1 < num_chars; iVar1++, iVar2 += sizeof(Tcharacter)) {
+      if (characters[iVar1].bmp) {
+        destroy_bitmap(characters[iVar1].bmp);
       }
-      iVar1 = iVar1 + 1;
-      iVar2 = iVar2 + 0x88c;
-    } while (iVar1 < num_chars);
+    }
+  
+    free(characters);
   }
-  free(_Memory);
   log2file("Unloading datafile");
   if (data != NULL) {
     unload_datafile(data);
