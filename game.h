@@ -201,7 +201,6 @@ Treplay* replay_selector(Tcontrol* ctrl, char* path);
 void init_scroller(Tscroller* sc, FONT* f, char* t, int w, int h, int horiz);
 void reset_options(Toptions *o);
 int generate_options_checksum(Toptions *o);
-uint64_t file_size_ex(char *filename);
 int load_hisc_table(Thisc_table *table,PACKFILE *fp);
 #define log2file(str, ...)
 

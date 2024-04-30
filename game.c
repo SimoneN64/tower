@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <sys/stat.h>
+#include <winsock.h>
 
 int itrcheck;
 char working_directory[1024];
@@ -62,29 +63,6 @@ void reset_hisc_table(Thisc_table *table,char *name,int hi,int lo) {
   }
 }
 
-uint64_t file_size_ex(char *filename) {
-  char *pcVar1;
-  PACKFILE *f_00;
-  PACKFILE *f;
-  int iVar2;
-  long ret;
-  uint64_t uVar3;
-
-  pcVar1 = strchr(filename,35);
-  if (pcVar1 != NULL) {
-    f_00 = pack_fopen_special_file(filename,"r");
-    if (f_00 != NULL) {
-      //iVar2 = (f_00->normal).todo;
-      pack_fclose(f_00);
-      return (uint64_t)iVar2;
-    }
-  }
-
-  struct _stat s;
-  _stat(filename, &s);
-  return s.st_size;
-}
-
 void reset_options(Toptions *o) {
   uint64_t uVar5;
 
@@ -110,7 +88,7 @@ void reset_options(Toptions *o) {
   strncpy(o->posterUrl, "http://www.freelunchdesign.com/?src=it14_game", 46);
   o->posterSrc[0] = 0;
   strncpy(o->posterSrc, "default.dat", 12);
-  uVar5 = file_size_ex("data/com/default.dat");
+  uVar5 = file_size("data/com/default.dat");
   o->posterSize = (int)uVar5;
 }
 
@@ -210,13 +188,13 @@ int init_game(int argc, char** argv) {
   char *ext;
   Tplayer *pTVar7;
   char *pcVar8;
-  //LPWSADATA pWVar9;
+  LPWSADATA pWVar9;
   DATAFILE *loader;
   int i_1;
   Tgamepad *gp_1;
   PACKFILE *fp;
   BITMAP *fldLogo;
-  //LPWSADATA lpWSAData;
+  LPWSADATA lpWSAData;
   char *checkFile;
   Tgamepad *gp;
   int last_cc;
@@ -225,7 +203,7 @@ int init_game(int argc, char** argv) {
   time_t tVar12;
   int iVar13;
   char buf [8];
-  //WSADATA wsaData;
+  WSADATA wsaData;
   char cfgfilename [256];
   char title [64];
   char tmpHandle [32];
@@ -238,17 +216,16 @@ int init_game(int argc, char** argv) {
   if (system_driver->set_window_title != NULL) {
     (*system_driver->set_window_title)(title);
   }
-  /*lpWSAData = (LPWSADATA)&wsaData;
-  i = _WSAStartup@8(0x202,lpWSAData);
+  lpWSAData = (LPWSADATA)&wsaData;
+  i = WSAStartup(0x202,lpWSAData);
   if (i != 0) {
     log2file(" !!! Failed to setup Winsock");
   }
-  pWVar9 = (LPWSADATA)(wsaData._0_4_ & 0xff);
-  if (((byte)wsaData._0_4_ < 2) || (SUB41(wsaData._0_4_,1) < 2)) {
-    log2file(" !!! Failed to get proper Winsock version (wanted 2.2, got %d.%d)",pWVar9,
-             (unsigned int)SUB41(wsaData._0_4_,1));
-    lpWSAData = pWVar9;
-  }*/
+  
+  if (((byte)wsaData.wHighVersion < 2) || (wsaData.wVersion < 2)) {
+    log2file(" !!! Failed to get proper Winsock version (wanted 2.2, got %d.%d)", wsaData.wHighVersion, wsaData.wVersion);
+  }
+  
   play_char.max = 0;
   play_char.value = 0;
   play_char.bmp = NULL;
@@ -281,7 +258,7 @@ int init_game(int argc, char** argv) {
   //fldads_start(); Thread dedicated to showing ADS, fuck that!!
   if (argc < 3) {
     if (argc == 2) {
-      /*lpWSAData = (LPWSADATA)argv[1];
+      lpWSAData = (LPWSADATA)argv[1];
       log2file("Loading %s",lpWSAData);
       demo = load_replay(argv[1]);
       if (demo == NULL) {
@@ -300,21 +277,21 @@ int init_game(int argc, char** argv) {
         }
         free(profile);
         profile = NULL;
-      }*/
+      }
     }
   }
   else {
-    //lpWSAData = NULL;
+    lpWSAData = NULL;
     iVar13 = 1;
     for(i = 1; i < argc; i++) {
-      /*pWVar9 = (LPWSADATA)argv[i];
+      pWVar9 = (LPWSADATA)argv[i];
       if (*(char *)&pWVar9->wVersion != '-') {
         lpWSAData = pWVar9;
       }
       iVar4 = stricmp((char *)pWVar9,"-check");
       if (iVar4 == 0) {
         iVar13 = 1;
-      }*/
+      }
       iVar4 = strcmp(argv[i],"-jumps");
       if (iVar4 == 0) {
         cmdline.jumps = 1;
@@ -323,10 +300,10 @@ int init_game(int argc, char** argv) {
       if (iVar4 == 0) {
         cmdline.combos = 1;
       }
-      /*iVar4 = strcmp(argv[i],(char *)NULL);
+      iVar4 = strcmp(argv[i],(char *)NULL);
       if (iVar4 == 0) {
         cmdline.sd = 1;
-      }*/
+      }
       iVar4 = strcmp(argv[i],"-keys");
       if (iVar4 == 0) {
         cmdline.keys = 1;
@@ -350,14 +327,14 @@ int init_game(int argc, char** argv) {
       return 0;
     }
     log2file("Loading %s",argv[2]);
-    /*demo = load_replay((char *)lpWSAData);
+    demo = load_replay((char *)lpWSAData);
     if (demo == NULL) {
       pcVar8 = get_filename((char *)lpWSAData);
       printf("<itrcheck_results status=\"error\">%s</itrcheck_results>\n",pcVar8);
       log2file("*** Failed!");
       dropped_file_is_not_a_replay = 1;
       return 0;
-    }*/
+    }
     itrcheck = 1;
     log2file("ITRCHECK activated, checking <%s>",lpWSAData);
   }
@@ -459,9 +436,9 @@ int init_game(int argc, char** argv) {
   select_palette((RGB *)dat->dat);
   i = makecol(255,255,255);
   (*screen->vtable->clear_to_color)(screen,i);
-  i = 200 - pBVar1->h / 2;
-  iVar13 = 320 - pBVar1->w / 2;
-  if (pBVar1->vtable->color_depth == 8) {
+  i = 200 - pBVar1->bmHeight / 2;
+  iVar13 = 320 - pBVar1->bmWidth / 2;
+  if (pBVar1->bmBitsPixel == 8) {
     (*screen->vtable->draw_256_sprite)(screen,pBVar1,iVar13,i);
   }
   else {

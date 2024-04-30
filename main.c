@@ -17,7 +17,6 @@ int main(int argc,char **argv) {
   bool bVar1;
   void* pHVar2;
   void* hDebugLibrary;
-  int *errno_ptr;
   FILE *logfile;
   int iVar3;
   int iVar4;
@@ -30,13 +29,11 @@ int main(int argc,char **argv) {
   char full_path [1024];
   char logfilename [256];
   
-  /*pHVar2 = LoadLibraryA("exchndl.dll");
+  pHVar2 = LoadLibraryA("exchndl.dll");
   if (pHVar2 == NULL) {
     printf("No exception handler present, RPTs will not be generated");
-  }*/
-  errno_ptr = &errno;
-  //_install_allegro_version_check(0,errno_ptr,exit_func_00401000,0x40401);
-  //register_png_file_type();
+  }
+  install_allegro(0,&errno,exit_func_00401000);
   get_executable_name(full_path,0x400);
   replace_filename(working_directory,full_path,"",0x400);
   _chdir(working_directory);
@@ -72,7 +69,7 @@ int main(int argc,char **argv) {
   if (init_game(argc,argv) == 0) {
     if (!dropped_file_is_not_a_replay) {
       log2file("* Failed to initialize the game *");
-      //printf("Failed to initialize the game.");
+      printf("Failed to initialize the game.");
     }
     log2file("Cleaning up Allegro");
     uninit_game();
@@ -99,7 +96,7 @@ int main(int argc,char **argv) {
     run_demo(NULL);
     if (itrcheck != 0) {
       log2file("Exiting Allegro");
-      //allegro_exit();
+      allegro_exit();
       log2file("\nDone...");
                     /* WARNING: Subroutine does not return */
       return 0;
@@ -108,7 +105,7 @@ int main(int argc,char **argv) {
   //load_new_ad_image();
   //startMenuMusic();
   log2file("\nMAIN MENU LOOP");
-  //clear_keybuf();
+  clear_keybuf();
   if ((options.timesStarted == 1) && (strcmp("guest",options.lastProfile) == 0)) {
     //main_menu_callback();
     //draw_menu(swap_screen,main_menu,&menu_params,355,285,0);
@@ -202,7 +199,7 @@ int main(int argc,char **argv) {
         menu_params.pos = 4;
         bVar1 = false;
       }
-      //rest(2);
+      rest(2);
     } while ((!closeButtonClicked) && (iVar4 != 0x6b));
   }
   //fadeOut(0x10);
