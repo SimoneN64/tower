@@ -7,7 +7,6 @@
 #include <assert.h>
 #include "game.h"
 #include "util.h"
-#include <unistd.h>
 #include <errno.h>
 
 void exit_func_00401000(void* func) {
@@ -40,7 +39,7 @@ int main(int argc,char **argv) {
   //register_png_file_type();
   get_executable_name(full_path,0x400);
   replace_filename(working_directory,full_path,"",0x400);
-  chdir(working_directory);
+  _chdir(working_directory);
   pcVar5 = logfilename;
   for (iVar4 = 256; iVar4 > 0; iVar4 = iVar4 - 1) {
     *(pcVar5++) = '\0';

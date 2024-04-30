@@ -35,6 +35,7 @@ int (*usetc)(char*, int);
 Tmenu_char_selection play_char;
 Tmenu_selection eyecandy_selection,scroll_speed_selection,floor_size_selection,gravity_selection;
 Tcommandline cmdline;
+bool window;
 
 Thisc_table * make_hisc_table(char *name) {
   Thisc_table *res;
@@ -73,14 +74,14 @@ uint64_t file_size_ex(char *filename) {
   if (pcVar1 != NULL) {
     f_00 = pack_fopen_special_file(filename,"r");
     if (f_00 != NULL) {
-      iVar2 = (f_00->normal).todo;
+      //iVar2 = (f_00->normal).todo;
       pack_fclose(f_00);
       return (uint64_t)iVar2;
     }
   }
 
-  struct stat s;
-  stat(filename, &s);
+  struct _stat s;
+  _stat(filename, &s);
   return s.st_size;
 }
 
@@ -414,7 +415,7 @@ int init_game(int argc, char** argv) {
       options.full_screen = -1;
       goto LAB_0040ed10;
     }
-    window = 1;
+    window = true;
     if (options.full_screen != 0) goto LAB_0040ed10;
   }
   else {
@@ -425,7 +426,7 @@ int init_game(int argc, char** argv) {
       printf("Failed to set graphics mode.");
       return 0;
     }
-    window = 0;
+    window = false;
   }
   if (screen == NULL) {
     log2file("ERROR: screen was not set")
@@ -562,7 +563,7 @@ int init_game(int argc, char** argv) {
   }
   else {
     if (itrcheck == 0) {
-      puVar2 = (undefined *)data->dat;
+      puVar2 = (uint32_t *)data->dat;
       puVar2[2] = 0;
       puVar2[1] = 0;
       *puVar2 = 0;

@@ -3,13 +3,7 @@
 //
 
 #pragma once
-int utf8_getx(char **s);
-void packfile_password(char *password);
-char* replace_filename(char* dest, char* path, char* filename, int size);
-void get_executable_name(char* dst, int len);
 int get_logfile_path(char* filename, int len);
-int text_height(FONT* f);
-int text_length(FONT* f, char* str);
 void get_configfile_path(char* cfgfilename, int len);
 int get_sort_method();
 void set_sort_method(int sm);
