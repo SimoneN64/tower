@@ -79,11 +79,11 @@ typedef struct Treplay {
   int random_seed;
   char comment[42];
   int tc_posts;
-  float tc_c_data[100];
-  float tc_q_data[100];
-  float tc_t_data[100];
-  float tc_s_data[100];
-  float tc_f_data[100];
+  fixed tc_c_data[100];
+  fixed tc_q_data[100];
+  fixed tc_t_data[100];
+  fixed tc_s_data[100];
+  fixed tc_f_data[100];
   Trecord* data;
 } Treplay;
 
@@ -201,9 +201,32 @@ typedef struct Tcharacter {
 typedef struct Tplayer {
   double x,y,sx,sy,max_s;
   int level,score,best_combo,status,jump_key,frame,in_combo,acc_level,acc_jumps,dead,rotate;
-  float angle;
+  fixed angle;
   int edge,edge_drawn,bounce,shake,latest_combo,show_combo,no_combo_top_floor,biggest_lost_combo,ccc[5],jcTop[5],jc[5];
 } Tplayer;
+
+typedef struct Tgd_combo {
+  int start, end, length;
+} Tgd_combo;
+
+typedef struct Tgd_jump_sequence {
+  int start, dist, num;
+} Tgd_jump_sequence;
+
+typedef struct Tparticle {
+  int intensity;
+  fixed x,y,sx,sy;
+  int color;
+} Tparticle;
+
+typedef struct Tgame_data {
+  Treplay* replay;
+  int score, floor, combo, no_combo_top_floor, biggest_lost_combo, ccc[5], jc[5], comboPosts;
+  Tgd_combo combos[5000];
+  int jumpPosts;
+  Tgd_jump_sequence jumps[5000];
+  int left, right, jump;
+} Tgame_data;
 
 void init_control(Tcontrol* ctrl);
 Thisc_table * make_hisc_table(char *name);
@@ -223,6 +246,7 @@ void switchedToProgram(void);
 void switchedFromProgram(void);
 void datafile_callback(DATAFILE *d);
 void datafile_callback_slow(DATAFILE *d);
+int play();
 #define log2file(str, ...)
 
 extern int itrcheck;
@@ -273,3 +297,4 @@ extern Tcharacter* characters;
 extern Tbeta* testers;
 extern int num_chars;
 extern int progress_count;
+extern bool recording;
