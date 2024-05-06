@@ -12,6 +12,9 @@
 #include <winsock.h>
 #include <math.h>
 
+#define CONCAT31(arr,x) (((uint32_t)(arr)[2]) << 24) | (((uint32_t)(arr)[1]) << 16) | (((uint32_t)(arr)[0]) << 8) | (x)
+#define CONCAT44(x,y) (((uint64_t)(x)) << 32) | (((uint64_t)(y)))
+
 int (*collision_types[5])() = {
   collision_type0,
   collision_type1,
@@ -1187,7 +1190,7 @@ LAB_00411d76:
   if (itrcheck == 0) {
     pTVar19 = ply[player_id];
     if (((pTVar19->rotate != 0) && (pTVar19->in_combo != 0)) && (options.flash == 0)) {
-      create_particle(stars,(int)ROUND(pTVar19->x),(int)ROUND(pTVar19->y) + -0x10);
+      create_particle(stars,(int)round(pTVar19->x),(int)round(pTVar19->y) + -0x10);
     }
     
     for(int i = 0; stars[i].intensity == 0; i++) {
@@ -1331,7 +1334,7 @@ LAB_004120c1:
     }
   }
   if (pTVar19->status == 0) {
-    iVar24 = get_level(&map,(int)floor(pTVar19->y));
+    iVar24 = get_level(&map,(int)round(pTVar19->y));
     iVar12 = (iVar24 - 1) / 5;
     pTVar19 = ply[player_id];
     iVar24 = pTVar19->level;
@@ -1594,7 +1597,7 @@ LAB_00412550:
     }
     if (-1 < checkMusicVoiceID) {
       iVar12 = voice_get_position(checkMusicVoiceID);
-      local_93c = (int)ROUND(((fixed)iVar12 * 50.0) / 44000.0);
+      local_93c = (int)round(((fixed)iVar12 * 50.0) / 44000.0);
       local_958 = 0;
       local_95c = 0.0;
     }
@@ -1687,7 +1690,7 @@ LAB_00412fba:
         }
         if (-1 < checkMusicVoiceID) {
           iVar12 = voice_get_position(checkMusicVoiceID);
-          local_93c = (int)ROUND(((fixed)iVar12 * 50.0) / 44000.0);
+          local_93c = (int)round(((fixed)iVar12 * 50.0) / 44000.0);
           local_958 = 0;
           local_95c = 0.0;
         }
@@ -1745,7 +1748,7 @@ LAB_00412fba:
       }
       if (-1 < checkMusicVoiceID) {
         iVar12 = voice_get_position(checkMusicVoiceID);
-        local_93c = (int)ROUND(((fixed)iVar12 * 50.0) / 44000.0);
+        local_93c = (int)round(((fixed)iVar12 * 50.0) / 44000.0);
         local_958 = 0;
         local_95c = 0.0;
       }
@@ -2057,11 +2060,11 @@ LAB_00414658:
         if (is_playing_custom_game == 0) {
           uVar27 = (uint32_t)(recording != 0);
         }
-        draw_results(swap_screen,(BITMAP *)data[local_934].dat,(int)ROUND(local_938),qualify,
+        draw_results(swap_screen,(BITMAP *)data[local_934].dat,(int)round(local_938),qualify,
                      qualifyValue,uVar27);
         if ((((bVar36) && (local_940 != 0)) && (is_playing_custom_game == 0)) && (recording != 0)) {
           textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,"Enter your initials",0x140,
-                            (int)ROUND(local_938 + local_938 + 80.0),-1,-1);
+                            (int)round(local_938 + local_938 + 80.0),-1,-1);
         }
         local_92c = (local_92c + 1) - (uint32_t)(local_92c == 0);
         pTVar19 = ply[player_id];
@@ -2171,24 +2174,24 @@ LAB_00414658:
         if (is_playing_custom_game == 0) {
           uVar18 = (uint32_t)(recording != 0);
         }
-        draw_results(swap_screen,(BITMAP *)data[iVar24].dat,(int)ROUND(local_938),qualify,
+        draw_results(swap_screen,(BITMAP *)data[iVar24].dat,(int)round(local_938),qualify,
                      qualifyValue,uVar18);
         if ((((bVar36) && (local_940 != 0)) && (is_playing_custom_game == 0)) && (recording != 0)) {
           fVar5 = local_938 + local_938;
           textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,"Enter your initials",0x140,
-                            (int)ROUND(fVar5 + 80.0),-1,-1);
+                            (int)round(fVar5 + 80.0),-1,-1);
           if (iVar17 == 0) {
             if ((local_94c & 4) == 0) {
               textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,(char *)((int)&c.start + 2),0x140
-                                ,(int)ROUND(fVar5 + 120.0),-1,-1);
+                                ,(int)round(fVar5 + 120.0),-1,-1);
 LAB_00415a92:
               in_stack_fffff660 = -1;
               in_stack_fffff65c = -1;
-              in_stack_fffff654 = (double)CONCAT44((int)ROUND(fVar5 + 120.0),0x154);
+              in_stack_fffff654 = (double)(CONCAT44((int)round(fVar5 + 120.0),0x154));
               in_stack_fffff650 = &c.end;
             }
             else {
-              iVar21 = (int)ROUND(fVar5 + 120.0);
+              iVar21 = (int)round(fVar5 + 120.0);
               textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,(char *)&c,300,iVar21,-1,-1);
 LAB_0041588b:
               textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,(char *)((int)&c.start + 2),0x140
@@ -2196,17 +2199,17 @@ LAB_0041588b:
 LAB_004158a7:
               in_stack_fffff660 = -1;
               in_stack_fffff65c = -1;
-              in_stack_fffff654 = (double)CONCAT44((int)ROUND(fVar5 + 120.0),0x154);
+              in_stack_fffff654 = (double)(CONCAT44((int)round(fVar5 + 120.0),0x154));
               in_stack_fffff650 = &c.end;
               textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,(char *)in_stack_fffff650,0x154,
-                                (int)ROUND(fVar5 + 120.0),-1,-1);
+                                (int)round(fVar5 + 120.0),-1,-1);
               if ((iVar17 != 3) || ((local_94c & 4) == 0)) goto LAB_00414a2d;
               local_990 = 0x168;
               local_994 = &DAT_004d6054;
             }
           }
           else {
-            iVar21 = (int)ROUND(fVar5 + 120.0);
+            iVar21 = (int)round(fVar5 + 120.0);
             textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,(char *)&c,300,iVar21,-1,-1);
             if (iVar17 != 1) {
               textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,(char *)((int)&c.start + 2),0x140
@@ -2231,7 +2234,7 @@ LAB_00414a2d:
             (*swap_screen->vtable->draw_sprite)(swap_screen,pBVar4,0x14,local_944);
           }
           textout_ex(swap_screen,(FONT *)data[0x34].dat,"rank up!",0x14,local_944 + 0x46,-1,-1);
-          local_944 = (int)ROUND((double)(0x140 - local_944) * 0.1 + (double)local_944);
+          local_944 = (int)round((double)(0x140 - local_944) * 0.1 + (double)local_944);
         }
         if (summary_scroller_message[0] != '\0') {
           scroll_scroller(&summary_scroller,-2);
@@ -2251,7 +2254,7 @@ LAB_00414a2d:
           if (iVar21 == 0) {
             restart_scroller(&summary_scroller);
           }
-          iVar12 = (int)ROUND((double)-iVar12 * 0.1 + (double)iVar12);
+          iVar12 = (int)round((double)-iVar12 * 0.1 + (double)iVar12);
         }
         local_92c = (local_92c + 1) - (uint32_t)(local_92c == 0);
         pTVar19 = ply[player_id];
@@ -2358,14 +2361,14 @@ LAB_00415112:
                 local_93c = 0x13;
               }
             }
-            if ((key[77] == '\0') && (key[63] == '\0')) {
-              uVar27 = iVar21 + -1 + (uint32_t)(iVar21 == 0);
+            if ((key[77] == '\0') && (key[63] == '\0') && (iVar21 != 0)) {
+              uVar27 = iVar21 - 1;
             }
             else {
               *(unsigned int *)((int)&c.start + iVar17 * 2) = 0x2e;
               uVar27 = 7;
               if (iVar17 != 0) {
-                iVar17 = iVar17 + -1;
+                iVar17--;
               }
             }
           }
