@@ -4,10 +4,15 @@
 
 #pragma once
 #define TOWER_VERSION "1.5.1"
-#include "gfx.h"
-#include "allegro/include/allegro.h"
 #include <stdbool.h>
 #include <stdint.h>
+#include "allegro/include/allegro/gfx.h"
+#include "allegro/include/allegro/text.h"
+#include "allegro/include/allegro/datafile.h"
+#include "allegro/include/allegro/palette.h"
+#include "allegro/include/allegro/sound.h"
+#include "allegro/include/allegro/file.h"
+#include "allegro/include/allegro/system.h"
 
 typedef struct Tbeta {
   char email[128];

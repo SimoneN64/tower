@@ -623,17 +623,17 @@ int init_game(int argc, char** argv) {
       rebuild_profile_list(NULL);
       log2file("Loading profile");
       draw_progress_bar();
-      log2file(" loading \'%s\'",0x4fe77c);
+      log2file(" loading '%s'",0x4fe77c);
       profile = load_profile(options.lastProfile);
       if (profile == NULL) {
-        log2file(" profile not found \'%s\'",0x4fe77c);
-        log2file(" trying to load default profile \'%s\'","guest");
+        log2file(" profile not found '%s'",0x4fe77c);
+        log2file(" trying to load default profile '%s'","guest");
         profile = load_profile("guest");
         if (profile == NULL) {
-          log2file(" profile not found \'%s\'","guest");
+          log2file(" profile not found '%s'","guest");
           profile = create_profile("guest",1);
           pcVar8 = profile->handle;
-          log2file(" created profile \'%s\'",pcVar8);
+          log2file(" created profile '%s'",pcVar8);
           if (profile == NULL) {
             log2file("  *** failed!",pcVar8)
             printf("Failed create profile.");
@@ -769,7 +769,7 @@ void uninit_game() {
   if (init_ok) {
     log2file("Saving config");
     save_config();
-    log2file("Saving profile \'%s\'", profile->handle);
+    log2file("Saving profile '%s'", profile->handle);
     p = profile;
     profile->msc_volume = options.msc_volume;
     p->snd_volume = options.snd_volume;
@@ -1152,25 +1152,25 @@ LAB_00411d76:
       start_reward(7);
     }
     if ((key[30] != '\0') && (bVar36)) {
-      start_reward(0xf);
+      start_reward(15);
     }
     if ((key[31] != '\0') && (bVar36)) {
-      start_reward(0x19);
+      start_reward(25);
     }
     if ((key[32] != '\0') && (bVar36)) {
-      start_reward(0x23);
+      start_reward(35);
     }
     if ((key[33] != '\0') && (bVar36)) {
-      start_reward(0x32);
+      start_reward(50);
     }
     if ((key[34] != '\0') && (bVar36)) {
-      start_reward(0x46);
+      start_reward(70);
     }
     if ((key[35] != '\0') && (bVar36)) {
       start_reward(100);
     }
     if ((key[36] != '\0') && (bVar36)) {
-      start_reward(0x8c);
+      start_reward(140);
     }
     if ((key[27] != '\0') && (bVar36)) {
       start_reward(200);
@@ -1909,7 +1909,7 @@ LAB_004124aa:
       pTVar2 = demo->data;
       iVar12 = 0;
       do {
-        uVar31 = (uint)pTVar2[iVar12].key_flags;
+        uVar31 = (uint32_t)pTVar2[iVar12].key_flags;
         iVar11 = 0;
         do {
           while (last_keys[iVar11] != 0) {
@@ -2055,7 +2055,7 @@ LAB_00414658:
         draw_frame(swap_screen);
         uVar27 = 0;
         if (is_playing_custom_game == 0) {
-          uVar27 = (uint)(recording != 0);
+          uVar27 = (uint32_t)(recording != 0);
         }
         draw_results(swap_screen,(BITMAP *)data[local_934].dat,(int)ROUND(local_938),qualify,
                      qualifyValue,uVar27);
@@ -2063,11 +2063,11 @@ LAB_00414658:
           textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,"Enter your initials",0x140,
                             (int)ROUND(local_938 + local_938 + 80.0),-1,-1);
         }
-        local_92c = (local_92c + 1) - (uint)(local_92c == 0);
+        local_92c = (local_92c + 1) - (uint32_t)(local_92c == 0);
         pTVar19 = ply[player_id];
         if ((pTVar19->level * 5 < local_92c) || (0xfa < local_92c)) {
           play_sound(sounds[6],0,1);
-          if (custom.falling != (SAMPLE *)0x0) {
+          if (custom.falling != NULL) {
             stop_sample(custom.falling);
           }
           pTVar19 = ply[player_id];
@@ -2079,7 +2079,7 @@ LAB_00414658:
         }
         else {
           p_Var3 = screen->vtable->acquire;
-          if (p_Var3 != (_func_void_BITMAP_ptr *)0x0) {
+          if (p_Var3 != NULL) {
             (*p_Var3)(screen);
           }
           iVar12 = swap_screen->h;
@@ -2087,7 +2087,7 @@ LAB_00414658:
           iVar17 = new_rand();
           blit(swap_screen,screen,0,iVar17 % 8,0,0,iVar11,iVar12);
           p_Var3 = screen->vtable->release;
-          if (p_Var3 != (_func_void_BITMAP_ptr *)0x0) {
+          if (p_Var3 != NULL) {
             (*p_Var3)(screen);
           }
           ply[player_id]->shake = ply[player_id]->shake + -1;
@@ -2110,7 +2110,7 @@ LAB_00414658:
       }
       else if (is_playing_custom_game == 0) {
         if (local_940 == 0) {
-          pcVar13 = "You\'re playing in guest mode. Start a profile and record your progress!";
+          pcVar13 = "You're playing in guest mode. Start a profile and record your progress!";
           if (!bVar36) {
             iVar12 = new_rand();
             pcVar13 = hints[iVar12 % 0x2d];
@@ -2124,7 +2124,7 @@ LAB_00414658:
             pcVar13 = pcVar13 + 1;
             pcVar35 = pcVar35 + 1;
           }
-          pcVar13 = "You\'re playing in guest mode. Start a profile and record your progress!";
+          pcVar13 = "You're playing in guest mode. Start a profile and record your progress!";
           if (!bVar36) {
             iVar12 = new_rand();
             pcVar13 = hints[iVar12 % 0x2d];
@@ -2133,9 +2133,7 @@ LAB_00414658:
         _strcpy(summary_scroller_message,pcVar13);
       }
       else {
-        pcVar13 = 
-        "Custom mode is crazy fun but does not add to your profile. Play Classic Mode to compete in the highscore lists and climb in rank!"
-        ;
+        pcVar13 = "Custom mode is crazy fun but does not add to your profile. Play Classic Mode to compete in the highscore lists and climb in rank!";
         pcVar35 = summary_scroller_message;
         for (iVar12 = 0x82; iVar12 != 0; iVar12 = iVar12 + -1) {
           *pcVar35 = *pcVar13;
@@ -2148,7 +2146,7 @@ LAB_00414658:
       scroll_scroller(&summary_scroller,-0x96);
       iVar11 = get_rank_id(profile);
       local_934 = 0;
-      local_944 = 0x244;
+      local_944 = 580;
       uVar27 = 0;
       iVar17 = 0;
       local_93c = 0x14;
@@ -2171,7 +2169,7 @@ LAB_00414658:
         draw_frame(swap_screen);
         uVar18 = 0;
         if (is_playing_custom_game == 0) {
-          uVar18 = (uint)(recording != 0);
+          uVar18 = (uint32_t)(recording != 0);
         }
         draw_results(swap_screen,(BITMAP *)data[iVar24].dat,(int)ROUND(local_938),qualify,
                      qualifyValue,uVar18);
@@ -2240,11 +2238,11 @@ LAB_00414a2d:
           drawing_mode(5,(BITMAP *)0x0,0,0);
           set_trans_blender(0,0,0,0x6e);
           iVar21 = makecol(0,0,0);
-          (*swap_screen->vtable->rectfill)(swap_screen,0,iVar12,0x27f,iVar12 + 0x14,iVar21);
+          rectfill(swap_screen,0,iVar12,0x27f,iVar12 + 0x14,iVar21);
           iVar21 = makecol(0,0,0);
-          (*swap_screen->vtable->rectfill)(swap_screen,0,iVar12,0x27f,iVar12 + 0x12,iVar21);
+          rectfill(swap_screen,0,iVar12,0x27f,iVar12 + 0x12,iVar21);
           iVar21 = makecol(0,0,0);
-          (*swap_screen->vtable->rectfill)(swap_screen,0,iVar12,0x27f,iVar12 + 0x10,iVar21);
+          rectfill(swap_screen,0,iVar12,0x27f,iVar12 + 0x10,iVar21);
           solid_mode();
           iVar21 = makecol(0x96,0x96,0x96);
           draw_scroller(&summary_scroller,swap_screen,1,iVar12,iVar21);
@@ -2255,11 +2253,11 @@ LAB_00414a2d:
           }
           iVar12 = (int)ROUND((double)-iVar12 * 0.1 + (double)iVar12);
         }
-        local_92c = (local_92c + 1) - (uint)(local_92c == 0);
+        local_92c = (local_92c + 1) - (uint32_t)(local_92c == 0);
         pTVar19 = ply[player_id];
         if ((pTVar19->level * 5 < local_92c) || (0xfa < local_92c)) {
           play_sound(sounds[6],0,1);
-          if (custom.falling != (SAMPLE *)0x0) {
+          if (custom.falling != NULL) {
             stop_sample(custom.falling);
           }
           pTVar19 = ply[player_id];
@@ -2271,15 +2269,15 @@ LAB_00414a2d:
         }
         else {
           p_Var3 = screen->vtable->acquire;
-          if (p_Var3 != (_func_void_BITMAP_ptr *)0x0) {
+          if (p_Var3 != NULL) {
             (*p_Var3)(screen);
           }
-          iVar21 = swap_screen->h;
-          iVar22 = swap_screen->w;
+          iVar21 = swap_screen->bmHeight;
+          iVar22 = swap_screen->bmWidth;
           iVar20 = new_rand();
           blit(swap_screen,screen,0,iVar20 % 8,0,0,iVar22,iVar21);
           p_Var3 = screen->vtable->release;
-          if (p_Var3 != (_func_void_BITMAP_ptr *)0x0) {
+          if (p_Var3 != NULL) {
             (*p_Var3)(screen);
           }
           ply[player_id]->shake = ply[player_id]->shake + -1;
@@ -2290,7 +2288,10 @@ LAB_00414a2d:
           if ((iVar21 != 0) && (local_93c == 0x14)) {
             uVar18 = readkey();
             iVar21 = (uVar18 & 0xff) - 0x20;
-            uVar23 = (undefined3)((uint)iVar21 >> 8);
+            uVar23[0] = (iVar21 >> 8) & 0xff;
+            uVar23[1] = (iVar21 >> 16) & 0xff;
+            uVar23[3] = (iVar21 >> 24) & 0xff;
+
             if (iVar21 == -0x18) {
               iVar21 = CONCAT31(uVar23,0xa4);
             }
@@ -2323,7 +2324,7 @@ LAB_00415033:
             iVar21 = 0;
             if (iVar22 != 0) {
               iVar21 = 8;
-              local_934 = local_934 + 1 & -(uint)((int)(local_934 + 1) <= (int)uVar31);
+              local_934 = local_934 + 1 & -(uint32_t)((int)(local_934 + 1) <= (int)uVar31);
             }
             iVar22 = is_left(&ctrl);
             if (iVar22 != 0) {
@@ -2358,7 +2359,7 @@ LAB_00415112:
               }
             }
             if ((key[77] == '\0') && (key[63] == '\0')) {
-              uVar27 = iVar21 + -1 + (uint)(iVar21 == 0);
+              uVar27 = iVar21 + -1 + (uint32_t)(iVar21 == 0);
             }
             else {
               *(unsigned int *)((int)&c.start + iVar17 * 2) = 0x2e;
@@ -2373,13 +2374,13 @@ LAB_00415112:
           }
           iVar21 = is_any(&ctrl);
           if ((iVar21 == 0) && (key[77] == '\0')) {
-            uVar27 = uVar27 & -(uint)(key[63] != '\0');
+            uVar27 = uVar27 & -(uint32_t)(key[63] != '\0');
           }
           if (iVar17 < 3) {
             *(unsigned int *)((int)&c.start + iVar17 * 2) = *(unsigned int *)((int)last_keys + local_934);
           }
         }
-        local_93c = local_93c - (uint)(local_93c != 0x14);
+        local_93c = local_93c - (uint32_t)(local_93c != 0x14);
         poll_control(&ctrl,0);
         if ((((!bVar36) || (local_940 == 0)) || (is_playing_custom_game != 0)) &&
            (((iVar21 = keypressed(), iVar21 != 0 || (iVar21 = is_fire(&ctrl), iVar21 != 0)) &&
@@ -2428,21 +2429,19 @@ LAB_00413fa0:
           iVar12 = gfx_driver->h;
           iVar11 = gfx_driver->w;
         }
-        (*swap_screen->vtable->rectfill)(swap_screen,0,0,iVar11,iVar12,iVar24);
+        rectfill(swap_screen,0,0,iVar11,iVar12,iVar24);
         solid_mode();
         pBVar4 = (BITMAP *)data[0x3a].dat;
-        iVar24 = 0x140 - pBVar4->w / 2;
-        if (pBVar4->vtable->color_depth == 8) {
-          (*swap_screen->vtable->draw_256_sprite)(swap_screen,pBVar4,iVar24,0x14);
+        iVar24 = 0x140 - pBVar4->bmWidth / 2;
+        if (pBVar4->bmBitsPixel == 8) {
+          draw_256_sprite(swap_screen,pBVar4,iVar24,0x14);
         }
         else {
-          (*swap_screen->vtable->draw_sprite)(swap_screen,pBVar4,iVar24,0x14);
+          draw_sprite(swap_screen,pBVar4,iVar24,0x14);
         }
         textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,"A new start floor",0x140,300,-1,-1);
-        textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,"has been unlocked!",0x140,0x15e,-1,-1)
-        ;
-        textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,"(Get it in the options menu)",0x140,
-                          0x1b8,-1,-1);
+        textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,"has been unlocked!",0x140,0x15e,-1,-1);
+        textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,"(Get it in the options menu)",0x140,0x1b8,-1,-1);
         play_sound(sounds[2],0,0);
         fadeIn(swap_screen,0x10);
         do {
@@ -2514,8 +2513,7 @@ LAB_00413fa0:
         if (profile->best_floor < demo->floor) {
           profile->best_floor = demo->floor;
           myDeleteFile(replay_directory,pTVar14->best_replay_names[2]);
-          sprintf(profile->best_replay_names[2],"%s_best_floor_%d.itr",profile->handle,demo->floor)
-          ;
+          sprintf(profile->best_replay_names[2],"%s_best_floor_%d.itr",profile->handle,demo->floor);
           save_replay(replay_directory,profile->best_replay_names[2],demo,rec_pos + 2,1);
           new_personal_best[2] = 1;
         }
@@ -2523,8 +2521,7 @@ LAB_00413fa0:
         if (profile->best_combo < demo->combo) {
           profile->best_combo = demo->combo;
           myDeleteFile(replay_directory,pTVar14->best_replay_names[1]);
-          sprintf(profile->best_replay_names[1],"%s_best_combo_%d.itr",profile->handle,demo->combo)
-          ;
+          sprintf(profile->best_replay_names[1],"%s_best_combo_%d.itr",profile->handle,demo->combo);
           save_replay(replay_directory,profile->best_replay_names[1],demo,rec_pos + 2,1);
           new_personal_best[1] = 1;
         }
