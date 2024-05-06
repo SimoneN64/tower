@@ -11,6 +11,15 @@
 #include <sys/stat.h>
 #include <winsock.h>
 
+int (*collision_types[5])() = {
+  collision_type0,
+  collision_type1,
+  collision_type2,
+  collision_type3,
+  collision_type4,
+};
+
+int collision_type;
 int itrcheck;
 char working_directory[1024];
 char replay_directory[1024];
@@ -509,7 +518,7 @@ int init_game(int argc, char** argv) {
   srand(time(NULL));
   log2file("Installing timers");
   draw_progress_bar();
-  install_timers();
+  installtimers();
   cycle_count = 0;
   log2file("Installing keyboard");
   draw_progress_bar();
@@ -899,7 +908,6 @@ int play() {
   int playing;
   int pos;
   int gotHigh;
-  int *piVar30;
   unsigned int uVar31;
   uint8_t *puVar32;
   int falling;
@@ -950,47 +958,52 @@ int play() {
   int qualifyValue [15];
   int qualify [15];
   Tcontrol rec_ctrl;
-  int speeds [9];
+  int speeds [10] = {
+    1500,
+    3000,
+    4500,
+    6000,
+    7500,
+    9000,
+    10500,
+    1800000,
+    9000000,
+    0
+  };
   int key_flag [7];
   int last_keys [7];
   int keys_pressed [7];
   Tgd_combo c;
   LARGE_INTEGER li;
   
-  piVar30 = &_C.513.42565;
-  piVar34 = speeds;
-  for (iVar24 = 9; iVar24 != 0; iVar24 = iVar24 + -1) {
-    *piVar34 = *piVar30;
-    piVar30 = piVar30 + 1;
-    piVar34 = piVar34 + 1;
-  }
-  pTVar29 = &ctrl;
+  /*pTVar29 = &ctrl;
   pTVar33 = &rec_ctrl;
   for (iVar24 = 9; iVar24 != 0; iVar24 = iVar24 + -1) {
     pTVar33->use_joy = pTVar29->use_joy;
     pTVar29 = (Tcontrol *)&pTVar29->key_left;
     pTVar33 = (Tcontrol *)&pTVar33->key_left;
-  }
+  }*/
+
   if (itrcheck == 0) {
-    local_994 = (unsigned int *)(profile->best_floor / 100);
+    //local_994 = (unsigned int *)(profile->best_floor / 100);
     local_990 = get_rank_id(profile);
   }
   else {
+    local_994 = NULL;
     local_990 = 0;
-    local_994 = (unsigned int *)0x0;
   }
   pTVar15 = demo;
   if (recording) {
     demo->tc_posts = 0;
     iVar24 = 0;
-    do {
-      pTVar15->tc_c_data[iVar24] = 0.0;
-      pTVar15->tc_q_data[iVar24] = 0.0;
-      pTVar15->tc_t_data[iVar24] = 0.0;
-      pTVar15->tc_s_data[iVar24] = 0.0;
-      pTVar15->tc_f_data[iVar24] = 0.0;
-      iVar24 = iVar24 + 1;
-    } while (iVar24 != 100);
+
+    for(int i = 0; i < 100; i++) {
+      pTVar15->tc_c_data[i] = 0.0;
+      pTVar15->tc_q_data[i] = 0.0;
+      pTVar15->tc_t_data[i] = 0.0;
+      pTVar15->tc_s_data[i] = 0.0;
+      pTVar15->tc_f_data[i] = 0.0;
+    }
   }
   log2file(" setting up play data");
   fall_count = 0;
@@ -1077,10 +1090,9 @@ LAB_00411c30:
       }
       fVar5 = (fixed)iVar24 / 44000.0;
       local_968 = iVar24;
-      if ((byte)(fVar5 < 0.01 | (byte)((ushort)((ushort)NAN(fVar5) << 10) >> 8) |
-                (byte)((ushort)((ushort)(fVar5 == 0.01) << 0xe) >> 8)) == 0) {
+      if (fVar5 <= 0.01) {
         local_95c = ((fixed)local_93c / 50.0) / fVar5 + local_95c;
-        local_958 = local_958 + 1;
+        local_958++;
       }
     }
   }
@@ -1096,13 +1108,13 @@ LAB_00411d76:
       fVar5 = -0.05;
     }
     in_stack_fffff654 = (double)fVar5;
-    _QueryPerformanceFrequency@4((LARGE_INTEGER *)&li);
+    QueryPerformanceFrequency((LARGE_INTEGER *)&li);
     uVar10 = li.u.LowPart;
-    _QueryPerformanceCounter@4((LARGE_INTEGER *)&li);
+    QueryPerformanceCounter((LARGE_INTEGER *)&li);
     dVar41 = (double)((((fixed)(li.u.LowPart - local_97c) * 50.0) / (fixed)uVar10) / 20.0);
     dVar40 = 50.0;
     dVar39 = 20.0;
-    tVar37 = _time((time_t *)0x0);
+    tVar37 = time(NULL);
     pTVar15 = demo;
     demo->tc_c_data[demo->tc_posts] = (fixed)in_stack_fffff654 + 0.0;
     pTVar15->tc_q_data[pTVar15->tc_posts] = (fixed)dVar41 + 0.0;
@@ -1119,9 +1131,9 @@ LAB_00411d76:
     }
     pTVar15->tc_posts = iVar24;
     local_980 = _clock();
-    _QueryPerformanceCounter@4((LARGE_INTEGER *)&li);
+    QueryPerformanceCounter((LARGE_INTEGER *)&li);
     local_97c = li.u.LowPart;
-    tVar37 = _time((time_t *)0x0);
+    tVar37 = time(NULL);
     local_978 = (int)tVar37;
     local_958 = 0;
     local_95c = 0.0;
@@ -1172,15 +1184,11 @@ LAB_00411d76:
     if (((pTVar19->rotate != 0) && (pTVar19->in_combo != 0)) && (options.flash == 0)) {
       create_particle(stars,(int)ROUND(pTVar19->x),(int)ROUND(pTVar19->y) + -0x10);
     }
-    pTVar28 = stars;
-    do {
-      while (pTVar28->intensity == 0) {
-        pTVar28 = pTVar28 + 1;
-        if (pTVar28 == (Tparticle *)&characters) goto LAB_00411fa4;
-      }
-      update_particle(pTVar28);
-      pTVar28 = pTVar28 + 1;
-    } while (pTVar28 != (Tparticle *)&characters);
+    
+    for(int i = 0; stars[i].intensity == 0; i++) {
+      if (&stars[i] == (Tparticle *)&characters) break;
+      update_particle(stars[i]);
+    }
   }
 LAB_00411fa4:
   iVar12 = player_id;
@@ -1282,10 +1290,10 @@ LAB_004120c1:
   if (((int)uVar27 < (int)uVar31) || (0xf < scroll_acc)) {
     add_floor(&map);
   }
-  if ((uint)collision_type < 5) {
+  if ((uint32_t)collision_type < 5) {
                     /* WARNING: Could not recover jumptable at 0x004125a3. Too many branches */
                     /* WARNING: Treating indirect jump as call */
-    iVar24 = (*(code *)(&PTR_LAB_004d60c4)[collision_type])();
+    iVar24 = collision_types[collision_type]();
     return iVar24;
   }
   allegro_message("unknown collision type");
@@ -1472,7 +1480,7 @@ LAB_00412b70:
     pTVar19->in_combo = 0;
     ply[player_id]->dead = 1;
     play_sound(custom.falling,0,1);
-    tVar37 = _time((time_t *)0x0);
+    tVar37 = time(NULL);
     iVar12 = player_id;
     local_984 = (int)tVar37;
     pTVar19 = ply[player_id];
@@ -1572,11 +1580,11 @@ LAB_00412550:
     iVar24 = 0;
   }
   if ((itrcheck == 0) && (key[47] != '\0')) {
-    tVar37 = _time((time_t *)0x0);
+    tVar37 = time(NULL);
     take_screenshot(swap_screen);
     do {
     } while (key[47] != '\0');
-    tVar38 = _time((time_t *)0x0);
+    tVar38 = time(NULL);
     iVar12 = (int)tVar38 - (int)tVar37;
     if (0 < iVar12) {
       local_96c = local_96c + iVar12;
@@ -1588,9 +1596,9 @@ LAB_00412550:
       local_95c = 0.0;
     }
     local_980 = _clock();
-    _QueryPerformanceCounter@4((LARGE_INTEGER *)&li);
+    QueryPerformanceCounter((LARGE_INTEGER *)&li);
     local_97c = li.u.LowPart;
-    tVar37 = _time((time_t *)0x0);
+    tVar37 = time(NULL);
     local_978 = (int)tVar37;
     local_938 = 0.0;
   }
@@ -1614,7 +1622,7 @@ LAB_00412550:
   if (recording != 0) {
     if (key[59] != '\0') {
       if (ply[player_id]->dead == 0) {
-        tVar37 = _time((time_t *)0x0);
+        tVar37 = time(NULL);
         iVar11 = clock_angle;
         iVar12 = fall_count;
         log2file("  game paused with esc");
@@ -1662,7 +1670,7 @@ LAB_00412fba:
         if (key[59] != '\0') {
           log2file("  game quit from esc pause");
           profile->games_quit = profile->games_quit + 1;
-          tVar38 = _time((time_t *)0x0);
+          tVar38 = time(NULL);
           local_984 = (int)tVar38;
           bVar8 = true;
           iVar24 = 0;
@@ -1671,7 +1679,7 @@ LAB_00412fba:
         fall_count = iVar12;
         clock_angle = iVar11;
         log2file("  game unpaused");
-        tVar38 = _time((time_t *)0x0);
+        tVar38 = time(NULL);
         iVar12 = (int)tVar38 - (int)tVar37;
         if (0 < iVar12) {
           local_96c = local_96c + iVar12;
@@ -1683,9 +1691,9 @@ LAB_00412fba:
           local_95c = 0.0;
         }
         local_980 = _clock();
-        _QueryPerformanceCounter@4((LARGE_INTEGER *)&li);
+        QueryPerformanceCounter((LARGE_INTEGER *)&li);
         local_97c = li.u.LowPart;
-        tVar37 = _time((time_t *)0x0);
+        tVar37 = time(NULL);
         local_978 = (int)tVar37;
         local_938 = 0.0;
       }
@@ -1696,7 +1704,7 @@ LAB_00412fba:
     }
     iVar12 = is_pause(&ctrl);
     if ((iVar12 != 0) && (ply[player_id]->dead == 0)) {
-      tVar37 = _time((time_t *)0x0);
+      tVar37 = time(NULL);
       iVar11 = clock_angle;
       iVar12 = fall_count;
       log2file("  game paused with pause key");
@@ -1730,7 +1738,7 @@ LAB_00412fba:
       fall_count = iVar12;
       clock_angle = iVar11;
       log2file("  game unpaused");
-      tVar38 = _time((time_t *)0x0);
+      tVar38 = time(NULL);
       iVar12 = (int)tVar38 - (int)tVar37;
       if (0 < iVar12) {
         local_96c = local_96c + iVar12;
@@ -1742,9 +1750,9 @@ LAB_00412fba:
         local_95c = 0.0;
       }
       local_980 = _clock();
-      _QueryPerformanceCounter@4((LARGE_INTEGER *)&li);
+      QueryPerformanceCounter((LARGE_INTEGER *)&li);
       local_97c = li.u.LowPart;
-      tVar37 = _time((time_t *)0x0);
+      tVar37 = time(NULL);
       local_978 = (int)tVar37;
       local_938 = 0.0;
     }

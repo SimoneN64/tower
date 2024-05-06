@@ -246,9 +246,16 @@ void switchedToProgram(void);
 void switchedFromProgram(void);
 void datafile_callback(DATAFILE *d);
 void datafile_callback_slow(DATAFILE *d);
+int collision_type0();
+int collision_type1();
+int collision_type2();
+int collision_type3();
+int collision_type4();
 int play();
 #define log2file(str, ...)
 
+extern int collision_type;
+extern int (*collision_types[5])();
 extern int itrcheck;
 extern int sort_method;
 extern char working_directory[1024];
