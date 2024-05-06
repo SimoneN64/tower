@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <sys/stat.h>
 #include <winsock.h>
+#include <math.h>
 
 int (*collision_types[5])() = {
   collision_type0,
@@ -856,6 +857,10 @@ void uninit_game() {
   }
 }
 
+int is_any(Tcontrol* c) {
+  return ~-(uint32_t)((c->flags & 0xbf) == 0);
+}
+
 int play() {
   char cVar1;
   Trecord *pTVar2;
@@ -1259,7 +1264,7 @@ LAB_00411fa4:
       ply[iVar12]->y = ply[iVar12]->y + (double)local_948;
     }
   }
-  if (hurry_y + 99U < 0x243) {
+  if (hurry_y + 99U < 579) {
     hurry_y -= 2;
   }
   any13 = scroll_acc;
@@ -1268,12 +1273,12 @@ LAB_00411fa4:
     pTVar19->ccc[local_974] = pTVar19->level;
     local_974 = local_974 + 1;
     local_948 = local_948 + 1;
-    hurry_y = 0x1df;
+    hurry_y = 479;
     play_sound(speaker[0],0,0);
     play_sound(sounds[4],0,0);
   }
-  if ((local_948 == 5) && (fall_count = fall_count + -0x2d, ply[player_id]->dead == 0)) {
-    clock_angle = clock_angle + -0x2d;
+  if ((local_948 == 5) && (fall_count -= 45, ply[player_id]->dead == 0)) {
+    clock_angle = clock_angle - 45;
     if (-1 < iVar24) goto LAB_004120c1;
 LAB_00412aa5:
     uVar31 = ((iVar24 & 0x8000000fU) - 1 | 0xfffffff0) + 1;
@@ -1302,7 +1307,7 @@ LAB_004120c1:
     pTVar19->angle = pTVar19->angle + 0x80000;
   }
   if (pTVar19->in_combo != 0) {
-    pTVar19->in_combo = pTVar19->in_combo + -1;
+    pTVar19->in_combo--;
     pTVar19 = ply[player_id];
     if ((pTVar19->in_combo == 0) && (1 < pTVar19->acc_jumps)) {
       iVar24 = pTVar19->acc_level;
@@ -1312,8 +1317,8 @@ LAB_004120c1:
         profile->rewards[iVar24] = profile->rewards[iVar24] + 1;
       }
       c.length = ply[player_id]->acc_level;
-      local_98c = local_98c + c.length;
-      local_954 = local_954 + 1;
+      local_98c += c.length;
+      local_954++;
       c.start = gdComboStart;
       c.end = gdComboStart + c.length;
       add_combo(gameData,&c);
@@ -1326,8 +1331,8 @@ LAB_004120c1:
     }
   }
   if (pTVar19->status == 0) {
-    iVar24 = get_level(&map,(int)ROUND(pTVar19->y));
-    iVar12 = (iVar24 + -1) / 5;
+    iVar24 = get_level(&map,(int)floor(pTVar19->y));
+    iVar12 = (iVar24 - 1) / 5;
     pTVar19 = ply[player_id];
     iVar24 = pTVar19->level;
     diff = iVar12 - iVar24;
@@ -1353,9 +1358,9 @@ LAB_004120c1:
       }
       iVar22 = player_id;
       iVar21 = 0;
-      iVar24 = 0x28;
+      iVar24 = 40;
       iVar17 = pTVar19->jc[0];
-      iVar11 = 0x20;
+      iVar11 = 32;
       if (iVar17 <= pTVar19->jcTop[0]) goto LAB_00412b2a;
       do {
         pTVar19->ccc[iVar11 + -0x1b] = iVar17;
@@ -1417,18 +1422,18 @@ LAB_00412953:
     else {
       if (iVar24 != 0) {
         iVar26 = 0;
-        iVar17 = 0x28;
+        iVar17 = 40;
         iVar22 = pTVar19->jc[0];
-        iVar21 = 0x20;
+        iVar21 = 32;
         iVar20 = iVar26;
         if (iVar22 <= pTVar19->jcTop[0]) goto LAB_00413746;
         do {
-          pTVar19->ccc[iVar21 + -0x1b] = iVar22;
+          pTVar19->ccc[iVar21 - 27] = iVar22;
           pTVar19 = ply[iVar11];
           iVar20 = iVar26;
 LAB_00413746:
           do {
-            pTVar19->ccc[iVar17 + -0x1e] = 0;
+            pTVar19->ccc[iVar17 - 30] = 0;
             iVar26 = iVar20 + 1;
             if (iVar26 == 5) {
               pTVar19 = ply[player_id];
@@ -1436,9 +1441,9 @@ LAB_00413746:
               goto LAB_00413186;
             }
             pTVar19 = ply[iVar11];
-            iVar17 = iVar20 + 0x29;
+            iVar17 = iVar20 + 41;
             iVar22 = pTVar19->jc[iVar20 + 1];
-            iVar21 = iVar20 + 0x21;
+            iVar21 = iVar20 + 33;
             iVar9 = iVar20 + 1;
             iVar20 = iVar26;
           } while (iVar22 <= pTVar19->jcTop[iVar9]);
@@ -1469,10 +1474,9 @@ LAB_00412b70:
     }
   }
   dVar41 = pTVar19->y;
-  if (((byte)(dVar41 < 540.0 | (byte)((ushort)((ushort)NAN(dVar41) << 10) >> 8) |
-             (byte)((ushort)((ushort)(dVar41 == 540.0) << 0xe) >> 8)) == 0) && (pTVar19->dead == 0))
+  if (dVar41 <= 540.0)
   {
-    iVar24 = -(uint)(itrcheck == 0);
+    iVar24 = -(uint32_t)(itrcheck == 0);
     if ((pTVar19->in_combo != 0) && (1 < pTVar19->acc_jumps)) {
       pTVar19->biggest_lost_combo = pTVar19->acc_level;
       pTVar19 = ply[player_id];
@@ -1485,15 +1489,14 @@ LAB_00412b70:
     local_984 = (int)tVar37;
     pTVar19 = ply[player_id];
     iVar11 = 0;
-    do {
-      pTVar25 = pTVar19;
-      if (pTVar19->jcTop[iVar11] < pTVar19->jc[iVar11]) {
-        pTVar19->jcTop[iVar11] = pTVar19->jc[iVar11];
-        pTVar25 = ply[iVar12];
+    
+    for(int i = 0; i < 5; i++) {
+      if(ply[player_id]->jcTop[i] < ply[player_id]->jc[i]) {
+        ply[player_id]->jcTop[i] = ply[player_id]->jc[i];
       }
-      pTVar25->jc[iVar11] = 0;
-      iVar11 = iVar11 + 1;
-    } while (iVar11 != 5);
+      ply[player_id]->jc[i] = 0;
+    }
+
     jumpSequence.dist = gdLastJumpDiff;
     add_jump_sequence(gameData,&jumpSequence);
     if (local_954 == 0) {
@@ -1515,18 +1518,18 @@ LAB_00412b70:
   else {
     iVar24 = -1;
   }
-  if (((byte)(dVar41 < 900.0 | (byte)((ushort)((ushort)NAN(dVar41) << 10) >> 8) |
-             (byte)((ushort)((ushort)(dVar41 == 900.0) << 0xe) >> 8)) == 0) && (!bVar7)) {
+  if (dVar41 <= 900.0) {
     play_sound(speaker[1],0,0);
     pTVar19 = ply[player_id];
     bVar7 = true;
   }
-  local_92c = (local_92c + 1) - (uint)(local_92c == 0);
+  if(local_92c != 0) {
+    local_92c++;
+  }
   iVar12 = pTVar19->level;
-  if ((local_92c != iVar12 * 5 && SBORROW4(local_92c,iVar12 * 5) == local_92c + iVar12 * -5 < 0) ||
-     (0xfa < local_92c)) {
+  if ((local_92c >= iVar12 * 5) || (local_92c >= 250)) {
     play_sound(sounds[6],0,1);
-    if (custom.falling != (SAMPLE *)0x0) {
+    if (custom.falling != NULL) {
       stop_sample(custom.falling);
     }
     pTVar19 = ply[player_id];
@@ -1540,7 +1543,7 @@ LAB_00412b70:
       iVar12 = 0;
       do {
         iVar11 = new_rand();
-        iVar11 = create_particle(stars,iVar11 % 600 + 0x14,0x1e0);
+        iVar11 = create_particle(stars,iVar11 % 600 + 0x14,480);
         iVar17 = new_rand();
         stars[iVar11].sy = -((iVar17 % 200 << 0x10) / 10);
         iVar12 = iVar12 + 1;
@@ -1567,7 +1570,7 @@ LAB_00412b70:
       pTVar19 = ply[player_id];
       iVar12 = pTVar19->edge_drawn;
     }
-    if (iVar12 == 0x32) {
+    if (iVar12 == 50) {
       pTVar19->edge_drawn = 0;
     }
   }
@@ -1627,22 +1630,20 @@ LAB_00412550:
         iVar12 = fall_count;
         log2file("  game paused with esc");
         iVar17 = 0;
-        do {
-          (*swap_screen->vtable->vline)(swap_screen,iVar17,0,0x1e0,0);
-          (*swap_screen->vtable->hline)(swap_screen,0,iVar17,0x280,0);
-          iVar17 = iVar17 + 2;
-        } while (iVar17 != 0x280);
-        textout_centre_ex(swap_screen,(FONT *)data[0x32].dat,"DO YOU REALLY WANT TO EXIT?",0x140,
+        for(int i = 0; i < 640; i += 2) {
+          vline(swap_screen,iVar17,0,480,0);
+          hline(swap_screen,0,iVar17,640,0);
+        }
+        textout_centre_ex(swap_screen,(FONT *)data[0x32].dat,"DO YOU REALLY WANT TO EXIT?",320,
                           0xa0,-1,-1);
-        textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,"Press any key to resume",0x140,0xd2,-1
+        textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,"Press any key to resume",320,210,-1
                           ,-1);
-        textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,"Press ESC to exit",0x140,0xf0,-1,-1);
+        textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,"Press ESC to exit",320,240,-1,-1);
         blit_to_screen(swap_screen);
         in_stack_fffff650 = (int *)0x1;
         play_sound(custom.wazup,0,1);
         poll_control(&ctrl,0);
-        while (((iVar17 = is_any(&ctrl), iVar17 != 0 || (iVar17 = is_pause(&ctrl), iVar17 != 0)) ||
-               ((closeButtonClicked == 0 && (key[59] != '\0'))))) {
+        while ((is_any(&ctrl) || is_pause(&ctrl)) || (!closeButtonClicked && (key[59] != '\0'))) {
           poll_control(&ctrl,0);
           rest(2);
         }
@@ -1709,11 +1710,10 @@ LAB_00412fba:
       iVar12 = fall_count;
       log2file("  game paused with pause key");
       iVar17 = 0;
-      do {
-        (*swap_screen->vtable->vline)(swap_screen,iVar17,0,0x1e0,0);
-        (*swap_screen->vtable->hline)(swap_screen,0,iVar17,0x280,0);
-        iVar17 = iVar17 + 2;
-      } while (iVar17 != 0x280);
+      for(int i = 0; i < 640; i += 2) {
+        vline(swap_screen,iVar17,0,480,0);
+        hline(swap_screen,0,iVar17,640,0);
+      }
       textout_centre_ex(swap_screen,(FONT *)data[0x32].dat,"Game Paused",0x140,0xa0,-1,-1);
       textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,"Press any key to resume",0x140,0xd2,-1,
                         -1);
@@ -1824,25 +1824,26 @@ LAB_00412754:
     }
 LAB_004124aa:
     if (itrcheck == 0) {
-      play::lexical_block_2::someCounter = play::lexical_block_2::someCounter + 1;
-      iVar12 = (-(uint)(fast_forward == 0) & 0xfffffffd) + 4;
+      static int someCounter = 0;
+      someCounter++;
+      iVar12 = (-(uint32_t)(fast_forward == 0) & 0xfffffffd) + 4;
       if (fast_fast_forward != 0) {
         iVar12 = 0x20;
       }
-      if ((!bVar8) && (play::lexical_block_2::someCounter % iVar12 == 0)) {
+      if ((!bVar8) && (someCounter % iVar12 == 0)) {
         draw_frame(swap_screen);
         if (ply[player_id]->shake == 0) {
           blit_to_screen(swap_screen);
         }
         else {
           p_Var3 = screen->vtable->acquire;
-          if (p_Var3 != (_func_void_BITMAP_ptr *)0x0) {
+          if (p_Var3 != NULL) {
             (*p_Var3)(screen);
           }
-          blit(swap_screen,swap_screen,0,local_970,0,0,swap_screen->w,swap_screen->h);
+          blit(swap_screen,swap_screen,0,local_970,0,0,swap_screen->bmWidth,swap_screen->bmHeight);
           blit_to_screen(swap_screen);
           p_Var3 = screen->vtable->release;
-          if (p_Var3 != (_func_void_BITMAP_ptr *)0x0) {
+          if (p_Var3 != NULL) {
             (*p_Var3)(screen);
           }
         }
@@ -1891,25 +1892,20 @@ LAB_004124aa:
     gd->jc[2] = pTVar19->jcTop[2];
     gd->jc[3] = pTVar19->jcTop[3];
     gd->jc[4] = pTVar19->jcTop[4];
-    piVar30 = keys_pressed;
-    for (iVar24 = 7; iVar24 != 0; iVar24 = iVar24 + -1) {
-      *piVar30 = 0;
-      piVar30 = piVar30 + 1;
-    }
-    piVar30 = &_C.583.43232;
-    piVar34 = key_flag;
-    for (iVar24 = 7; iVar24 != 0; iVar24 = iVar24 + -1) {
-      *piVar34 = *piVar30;
-      piVar30 = piVar30 + 1;
-      piVar34 = piVar34 + 1;
-    }
+    
+    memset(keys_pressed, 0, sizeof(int)*7);
+    
+    key_flag[0] = 1;
+    key_flag[1] = 2;
+    key_flag[2] = 4;
+    key_flag[3] = 8;
+    key_flag[4] = 16;
+    key_flag[5] = 32;
+    key_flag[6] = 128;
+
     iVar24 = demo->size;
     if (0 < iVar24) {
-      piVar30 = last_keys;
-      for (iVar12 = 7; iVar12 != 0; iVar12 = iVar12 + -1) {
-        *piVar30 = 0;
-        piVar30 = piVar30 + 1;
-      }
+      memset(last_keys, 0, sizeof(int)*7);
       pTVar2 = demo->data;
       iVar12 = 0;
       do {
@@ -1964,7 +1960,7 @@ LAB_004138c5:
     save_profile(pTVar14);
     if (bVar8) {
 LAB_00413a3d:
-      rr = (Treplay *)0x0;
+      rr = NULL;
       goto LAB_00413a3f;
     }
 LAB_00413e60:
@@ -2147,7 +2143,7 @@ LAB_00414658:
           pcVar35 = pcVar35 + 1;
         }
       }
-      init_scroller(&summary_scroller,(FONT *)data[0x36].dat,summary_scroller_message,0x280,0x1e,-1)
+      init_scroller(&summary_scroller,(FONT *)data[0x36].dat,summary_scroller_message,640,0x1e,-1)
       ;
       scroll_scroller(&summary_scroller,-0x96);
       iVar11 = get_rank_id(profile);
@@ -2420,7 +2416,7 @@ LAB_00413fa0:
       if ((((recording != 0) && (debug == 0)) && (is_playing_custom_game == 0)) &&
          ((iVar24 = ply[player_id]->level / 100, (int)local_994 < iVar24 && (iVar24 < 10)))) {
         fadeOut(0x10);
-        blit((BITMAP *)data[0x7e].dat,swap_screen,0,0,0,0,0x280,0x1e0);
+        blit((BITMAP *)data[0x7e].dat,swap_screen,0,0,0,0,640,480);
         set_trans_blender(0,0,0,0x9e);
         drawing_mode(5,(BITMAP *)0x0,0,0);
         iVar24 = makecol(0,0,0);
@@ -2462,7 +2458,7 @@ LAB_00413fa0:
     if (-1 < checkMusicVoiceID) {
       voice_stop(checkMusicVoiceID);
     }
-    rr = (Treplay *)0x0;
+    rr = NULL;
     if (recording == 0) goto LAB_00413a4c;
     if (debug == 0) {
       in_replay_menu = 1;
@@ -2518,7 +2514,7 @@ LAB_00413fa0:
         if (profile->best_floor < demo->floor) {
           profile->best_floor = demo->floor;
           myDeleteFile(replay_directory,pTVar14->best_replay_names[2]);
-          _sprintf(profile->best_replay_names[2],"%s_best_floor_%d.itr",profile->handle,demo->floor)
+          sprintf(profile->best_replay_names[2],"%s_best_floor_%d.itr",profile->handle,demo->floor)
           ;
           save_replay(replay_directory,profile->best_replay_names[2],demo,rec_pos + 2,1);
           new_personal_best[2] = 1;
@@ -2527,7 +2523,7 @@ LAB_00413fa0:
         if (profile->best_combo < demo->combo) {
           profile->best_combo = demo->combo;
           myDeleteFile(replay_directory,pTVar14->best_replay_names[1]);
-          _sprintf(profile->best_replay_names[1],"%s_best_combo_%d.itr",profile->handle,demo->combo)
+          sprintf(profile->best_replay_names[1],"%s_best_combo_%d.itr",profile->handle,demo->combo)
           ;
           save_replay(replay_directory,profile->best_replay_names[1],demo,rec_pos + 2,1);
           new_personal_best[1] = 1;
@@ -2536,7 +2532,7 @@ LAB_00413fa0:
         if (profile->best_score < demo->score) {
           profile->best_score = demo->score;
           myDeleteFile(replay_directory,pTVar14->best_replay_names[0]);
-          _sprintf(profile->best_replay_names[0],"%s_best_score_%d.itr",profile->handle,demo->score)
+          sprintf(profile->best_replay_names[0],"%s_best_score_%d.itr",profile->handle,demo->score)
           ;
           save_replay(replay_directory,profile->best_replay_names[0],demo,rec_pos + 2,1);
           new_personal_best[0] = 1;
@@ -2546,7 +2542,7 @@ LAB_00413fa0:
         if (profile->no_combo_top_floor < pTVar19->no_combo_top_floor) {
           profile->no_combo_top_floor = pTVar19->no_combo_top_floor;
           myDeleteFile(replay_directory,pTVar14->best_replay_names[4]);
-          _sprintf(profile->best_replay_names[4],"%s_best_no_combo_%d.itr",profile->handle,
+          sprintf(profile->best_replay_names[4],"%s_best_no_combo_%d.itr",profile->handle,
                    demo->no_combo_top_floor);
           save_replay(replay_directory,profile->best_replay_names[4],demo,rec_pos + 2,1);
           new_personal_best[4] = 1;
@@ -2556,7 +2552,7 @@ LAB_00413fa0:
         if (profile->biggest_lost_combo < pTVar19->biggest_lost_combo) {
           profile->biggest_lost_combo = pTVar19->biggest_lost_combo;
           myDeleteFile(replay_directory,pTVar14->best_replay_names[3]);
-          _sprintf(profile->best_replay_names[3],"%s_best_lost_combo_%d.itr",profile->handle,
+          sprintf(profile->best_replay_names[3],"%s_best_lost_combo_%d.itr",profile->handle,
                    demo->biggest_lost_combo);
           save_replay(replay_directory,profile->best_replay_names[3],demo,rec_pos + 2,1);
           new_personal_best[3] = 1;
@@ -2570,7 +2566,7 @@ LAB_00413fa0:
           if (pTVar14->cccTotal[iVar24 + 4] < pTVar19->ccc[iVar24 + -1]) {
             pTVar14->cccTotal[iVar24 + 4] = pTVar19->ccc[iVar24 + -1];
             myDeleteFile(replay_directory,pTVar14->best_replay_names[0] + iVar12);
-            _sprintf(profile->best_replay_names[0] + iVar12,"%s_best_cc%d_%d.itr",profile->handle,
+            sprintf(profile->best_replay_names[0] + iVar12,"%s_best_cc%d_%d.itr",profile->handle,
                      iVar24,ply[player_id]->ccc[iVar24 + -1]);
             save_replay(replay_directory,profile->best_replay_names[0] + iVar12,demo,rec_pos + 2,1);
             new_personal_best[iVar24 + 4] = 1;
@@ -2589,7 +2585,7 @@ LAB_00413fa0:
           if (pTVar14->ccc[iVar24 + 4] < pTVar19->ccc[iVar24 + 4]) {
             pTVar14->ccc[iVar24 + 4] = pTVar19->ccc[iVar24 + 4];
             myDeleteFile(replay_directory,pTVar14->best_replay_names[0] + iVar12);
-            _sprintf(profile->best_replay_names[0] + iVar12,"%s_best_jj%d_%d.itr",profile->handle,
+            sprintf(profile->best_replay_names[0] + iVar12,"%s_best_jj%d_%d.itr",profile->handle,
                      iVar24,ply[player_id]->ccc[iVar24 + 4]);
             save_replay(replay_directory,profile->best_replay_names[0] + iVar12,demo,rec_pos + 2,1);
             new_personal_best[iVar24 + 9] = 1;
@@ -2607,9 +2603,9 @@ LAB_00413fa0:
         uberChecksum = 0;
       }
       else {
-        _sprintf((char *)qualifyValue,"%slast_game.itr",replay_directory);
+        sprintf((char *)qualifyValue,"%slast_game.itr",replay_directory);
         pTVar15 = load_replay((char *)qualifyValue);
-        if (pTVar15 != (Treplay *)0x0) {
+        if (pTVar15 != NULL) {
           uberChecksum = calc_replay_checksum(demo);
           destroy_replay(pTVar15);
         }
@@ -2627,7 +2623,7 @@ LAB_00413fa0:
     pTVar14->jump_hold = options.jump_hold;
     pTVar14->flash = options.flash;
     save_profile(pTVar14);
-    rr = (Treplay *)0x0;
+    rr = NULL;
 LAB_00413a3f:
     if (recording == 0) goto LAB_00413a4c;
   }
