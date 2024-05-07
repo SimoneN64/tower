@@ -13,6 +13,7 @@
 #include "allegro/include/allegro/sound.h"
 #include "allegro/include/allegro/file.h"
 #include "allegro/include/allegro/system.h"
+#include "allegro/include/allegro/joystick.h"
 
 typedef struct Tbeta {
   char email[128];
@@ -233,6 +234,26 @@ typedef struct Tgame_data {
   int left, right, jump;
 } Tgame_data;
 
+typedef struct Tfloor {
+  int empty,start_tile,end_tile,level,sign,tiles;
+} Tfloor;
+
+typedef struct Tmap {
+  Tfloor room[32];
+  int offset;
+} Tmap;
+
+typedef struct Tcustom {
+  char name[128];
+  BITMAP* frame;
+  PALETTE pal;
+  SAMPLE* jump_sound,*falling,*edge,*yo,*wazup,*bg_music;
+  MIDI* bg_midi;
+  int uses_datafile;
+  DATAFILE* df;
+  int ok;
+} Tcustom;
+
 void init_control(Tcontrol* ctrl);
 Thisc_table * make_hisc_table(char *name);
 void reset_hisc_table(Thisc_table *table,char *name,int hi,int lo);
@@ -259,6 +280,10 @@ int collision_type4();
 int play();
 #define log2file(str, ...)
 
+extern Tcustom custom;
+extern int start_speeds[6];
+extern Tparticle stars[512];
+extern int fall_count,clock_angle;
 extern int collision_type;
 extern int (*collision_types[5])();
 extern int itrcheck;
@@ -266,8 +291,10 @@ extern int sort_method;
 extern char working_directory[1024];
 extern char replay_directory[1024];
 extern bool dropped_file_is_not_a_replay;
+extern char key[127];
 extern Tscroller greeting_scroller;
 extern DATAFILE* data;
+extern Tmap map;
 extern const char* scroller_greetings;
 extern Tmenu_params menu_params;
 extern bool got_joystick, closeButtonClicked, hasFocus;
@@ -281,6 +308,7 @@ extern Tprofile* profile;
 extern Tcontrol ctrl;
 extern SAMPLE* bg_menu;
 extern Thisc_table* hisc_tables[15];
+extern JOYSTICK_INFO joy[8];
 extern char* hisc_names[15];
 extern SYSTEM_DRIVER* system_driver;
 extern int (*usetc)(char*, int);
@@ -288,7 +316,7 @@ extern Tmenu_char_selection play_char;
 extern Tmenu_selection eyecandy_selection,scroll_speed_selection,floor_size_selection,gravity_selection;
 extern Tcommandline cmdline;
 extern int cycle_count;
-extern bool window;
+extern bool window,debug;
 extern char init_string[7];
 extern int player_id;
 extern Tplayer* ply[1000];
@@ -307,6 +335,6 @@ extern Tmenu_floor_selection floors;
 extern int seed;
 extern Tcharacter* characters;
 extern Tbeta* testers;
-extern int num_chars;
+extern int num_chars,logic_count;
 extern int progress_count;
-extern bool recording;
+extern bool recording,fast_forward,fast_fast_forward;

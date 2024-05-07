@@ -30,6 +30,7 @@ char replay_directory[1024];
 bool dropped_file_is_not_a_replay;
 Tscroller greeting_scroller;
 DATAFILE* data;
+const char* uppercase_alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ .";
 const char* scroller_greetings = "         Welcome to Icy Tower!     Help Harold the Homeboy to climb as high as possible!       Use arrow keys to move and spacebar to jump.      Good luck!";
 Tmenu_params menu_params;
 bool got_joystick, closeButtonClicked, hasFocus;
@@ -64,14 +65,22 @@ SAMPLE* menu_sounds[2];
 SAMPLE* jump_sound[3];
 SAMPLE* bg_beat;
 SAMPLE* bg_menu;
+JOYSTICK_INFO joy[8];
 Tmenu_slider snd_volume_slider,msc_volume_slider,eyecandy_selection,gravity_selection,floor_size_selection,scroll_speed_selection;
 Tmenu_floor_selection floors;
-int seed;
+int seed,logic_count;
 Tcharacter* characters;
 Tbeta* testers;
 int num_chars;
 int progress_count = 0;
-bool recording;
+bool recording,fast_forward,fast_fast_forward,debug;
+int fall_count,clock_angle;
+Tmap map;
+Tcustom custom;
+char key[127];
+Tparticle stars[512];
+int start_speeds[6] = {5,4,3,2,1,0};
+uint32_t DAT_004d6054 = 0x2500;
 
 Thisc_table * make_hisc_table(char *name) {
   Thisc_table *res;
@@ -1937,8 +1946,8 @@ LAB_004138c5:
     gd->right = keys_pressed[2];
     if (itrcheck != 0) {
       pcVar13 = getGameDataXML(gd);
-      _printf("%s",pcVar13);
-      _free(pcVar13);
+      printf("%s",pcVar13);
+      free(pcVar13);
       if (itrcheck != 0) {
         return 0;
       }
@@ -2016,10 +2025,10 @@ LAB_00413e60:
       play_sound(sounds[7],0,0);
     }
     if (debug == 0) {
-      puVar32 = &DAT_004d60a4;
+      puVar32 = uppercase_alphabet;
       piVar30 = last_keys;
       for (iVar12 = 0x1f; iVar12 != 0; iVar12 = iVar12 + -1) {
-        *(undefined1 *)piVar30 = *puVar32;
+        *(char *)piVar30 = *puVar32;
         puVar32 = puVar32 + 1;
         piVar30 = (int *)((int)piVar30 + 1);
       }
@@ -2085,8 +2094,8 @@ LAB_00414658:
           if (p_Var3 != NULL) {
             (*p_Var3)(screen);
           }
-          iVar12 = swap_screen->h;
-          iVar11 = swap_screen->w;
+          iVar12 = swap_screen->bmHeight;
+          iVar11 = swap_screen->bmWidth;
           iVar17 = new_rand();
           blit(swap_screen,screen,0,iVar17 % 8,0,0,iVar11,iVar12);
           p_Var3 = screen->vtable->release;
@@ -2116,7 +2125,7 @@ LAB_00414658:
           pcVar13 = "You're playing in guest mode. Start a profile and record your progress!";
           if (!bVar36) {
             iVar12 = new_rand();
-            pcVar13 = hints[iVar12 % 0x2d];
+            pcVar13 = hints[iVar12 % 45];
           }
         }
         else {
@@ -2130,7 +2139,7 @@ LAB_00414658:
           pcVar13 = "You're playing in guest mode. Start a profile and record your progress!";
           if (!bVar36) {
             iVar12 = new_rand();
-            pcVar13 = hints[iVar12 % 0x2d];
+            pcVar13 = hints[iVar12 % 45];
           }
         }
         _strcpy(summary_scroller_message,pcVar13);
@@ -2144,9 +2153,9 @@ LAB_00414658:
           pcVar35 = pcVar35 + 1;
         }
       }
-      init_scroller(&summary_scroller,(FONT *)data[0x36].dat,summary_scroller_message,640,0x1e,-1)
+      init_scroller(&summary_scroller,(FONT *)data[0x36].dat,summary_scroller_message,640,30,-1)
       ;
-      scroll_scroller(&summary_scroller,-0x96);
+      scroll_scroller(&summary_scroller,-150);
       iVar11 = get_rank_id(profile);
       local_934 = 0;
       local_944 = 580;
@@ -2178,11 +2187,11 @@ LAB_00414658:
                      qualifyValue,uVar18);
         if ((((bVar36) && (local_940 != 0)) && (is_playing_custom_game == 0)) && (recording != 0)) {
           fVar5 = local_938 + local_938;
-          textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,"Enter your initials",0x140,
+          textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,"Enter your initials",320,
                             (int)round(fVar5 + 80.0),-1,-1);
           if (iVar17 == 0) {
             if ((local_94c & 4) == 0) {
-              textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,(char *)((int)&c.start + 2),0x140
+              textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,(char *)((int)&c.start + 2),320
                                 ,(int)round(fVar5 + 120.0),-1,-1);
 LAB_00415a92:
               in_stack_fffff660 = -1;
@@ -2194,17 +2203,17 @@ LAB_00415a92:
               iVar21 = (int)round(fVar5 + 120.0);
               textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,(char *)&c,300,iVar21,-1,-1);
 LAB_0041588b:
-              textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,(char *)((int)&c.start + 2),0x140
+              textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,(char *)((int)&c.start + 2),320
                                 ,iVar21,-1,-1);
 LAB_004158a7:
               in_stack_fffff660 = -1;
               in_stack_fffff65c = -1;
               in_stack_fffff654 = (double)(CONCAT44((int)round(fVar5 + 120.0),0x154));
               in_stack_fffff650 = &c.end;
-              textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,(char *)in_stack_fffff650,0x154,
+              textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,(char *)in_stack_fffff650,340,
                                 (int)round(fVar5 + 120.0),-1,-1);
               if ((iVar17 != 3) || ((local_94c & 4) == 0)) goto LAB_00414a2d;
-              local_990 = 0x168;
+              local_990 = 360;
               local_994 = &DAT_004d6054;
             }
           }
@@ -2221,17 +2230,17 @@ LAB_004158a7:
             if ((local_94c & 4) != 0) goto LAB_0041588b;
           }
           textout_centre_ex(swap_screen,(FONT *)data[0x34].dat,(char *)in_stack_fffff650,
-                            SUB84(in_stack_fffff654,0),(int)((ulonglong)in_stack_fffff654 >> 0x20),
+                            (uint32_t)(*(uint64_t*)(&in_stack_fffff654),0),(int)((uint64_t)in_stack_fffff654 >> 0x20),
                             in_stack_fffff65c,in_stack_fffff660);
         }
 LAB_00414a2d:
         if (local_990 != iVar11) {
           pBVar4 = (BITMAP *)data[iVar11 + 0x4a].dat;
-          if (pBVar4->vtable->color_depth == 8) {
-            (*swap_screen->vtable->draw_256_sprite)(swap_screen,pBVar4,0x14,local_944);
+          if (pBVar4->bmBitsPixel == 8) {
+            draw_256_sprite(swap_screen,pBVar4,0x14,local_944);
           }
           else {
-            (*swap_screen->vtable->draw_sprite)(swap_screen,pBVar4,0x14,local_944);
+            draw_sprite(swap_screen,pBVar4,0x14,local_944);
           }
           textout_ex(swap_screen,(FONT *)data[0x34].dat,"rank up!",0x14,local_944 + 0x46,-1,-1);
           local_944 = (int)round((double)(0x140 - local_944) * 0.1 + (double)local_944);
