@@ -28,7 +28,7 @@ int itrcheck;
 char working_directory[1024];
 char replay_directory[1024];
 bool dropped_file_is_not_a_replay;
-Tscroller greeting_scroller;
+Tscroller greeting_scroller, summary_scroller;
 DATAFILE* data;
 const char* uppercase_alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ .";
 const char* scroller_greetings = "         Welcome to Icy Tower!     Help Harold the Homeboy to climb as high as possible!       Use arrow keys to move and spacebar to jump.      Good luck!";
@@ -42,7 +42,7 @@ BITMAP* swap_screen;
 bool init_ok;
 Tprofile* profile;
 Tcontrol ctrl;
-SAMPLE* bg_menu;
+SDL_AudioStream* bg_menu;
 Thisc_table* hisc_tables[15];
 char* hisc_names[15];
 SYSTEM_DRIVER* system_driver;
@@ -51,36 +51,92 @@ Tmenu_char_selection play_char;
 Tmenu_selection eyecandy_selection,scroll_speed_selection,floor_size_selection,gravity_selection;
 Tcommandline cmdline;
 bool window;
-int cycle_count;
+int cycle_count,checkMusicVoiceID,gdComboStart;
 char init_string[7] = "qyuj}h";
 int player_id;
 Tplayer* ply[1000];
 BITMAP* gameover_bmp;
 DATAFILE* sfx;
 char sfx_file[512];
-SAMPLE* combo_sound[10];
-SAMPLE* speaker[3];
-SAMPLE* sounds[9];
-SAMPLE* menu_sounds[2];
-SAMPLE* jump_sound[3];
-SAMPLE* bg_beat;
-SAMPLE* bg_menu;
-JOYSTICK_INFO joy[8];
+SDL_AudioStream* combo_sound[10];
+SDL_AudioStream* speaker[3];
+SDL_AudioStream* sounds[9];
+SDL_AudioStream* menu_sounds[2];
+SDL_AudioStream* jump_sound[3];
+SDL_AudioStream* bg_beat;
+SDL_AudioStream* bg_menu;
+SDL_Joystick joy[8];
 Tmenu_slider snd_volume_slider,msc_volume_slider,eyecandy_selection,gravity_selection,floor_size_selection,scroll_speed_selection;
 Tmenu_floor_selection floors;
 int seed,logic_count;
 Tcharacter* characters;
 Tbeta* testers;
 int num_chars;
+int uberChecksum;
 int progress_count = 0;
-bool recording,fast_forward,fast_fast_forward,debug;
-int fall_count,clock_angle;
+bool recording,fast_forward,fast_fast_forward,debug,lastFocus;
+int fall_count,clock_angle,hurry_y,gdLastJumpDiff;
+Tgd_jump_sequence jumpSequence;
 Tmap map;
 Tcustom custom;
 char key[127];
+int new_personal_best[15];
+bool in_replay_menu;
+int rec_pos;
 Tparticle stars[512];
 int start_speeds[6] = {5,4,3,2,1,0};
 uint32_t DAT_004d6054 = 0x2500;
+Tgame_data* gameData;
+char summary_scroller_message[5120];
+char* hints[45] = {
+  "How much is left to reach the next rank?",
+  "Check out your profile to see what you need to do to reach the next rank!",
+  "In your profile you can see all your records! Check it out!",
+  "How many times did you jump? Check out your profile!",
+  "Tell your friends about Icy Tower. The more the merrier!",
+  "Is that really your best?",
+  "Was that really your best?",
+  "You can do better than that!",
+  "You can do better! One more time!",
+  "Just one more time! Please?",
+  "Make combo jumps for lots of score!",
+  "Bounce on the walls to maintain your speed!",
+  "AGAIN!",
+  "Play again!",
+  "Didn't you see that coming?",
+  "Awww... Try again!",
+  "That was close! You'll make it next time!",
+  "Did you beat your high score yet?",
+  "Calm_down, it's not as hard as it seems.",
+  "Come on, concentrate!",
+  "Come on, focus!",
+  "Better luck next time!",
+  "Harold the Homeboy really likes cheese!",
+  "There is always room for improvement! Once more!",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "Maybe you should try playing with a different character?",
+  "Did you try playing with a different character?",
+  "Icy Tower is a game from Free Lunch Design. More awesome games on our website!",
+  "You are playing Icy Tower, the game that everyone loves!",
+  "Everybody loves Icy Tower, you too!",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  ""
+};
 
 Thisc_table * make_hisc_table(char *name) {
   Thisc_table *res;
@@ -504,8 +560,8 @@ int init_game(int argc, char** argv) {
   }
   packfile_password(NULL);
   log2file("Putting FLD Logo on screen");
-  pBVar1 = (BITMAP *)dat[1].dat;
-  select_palette((RGB *)dat->dat);
+  pBVar1 = (SDL_Surface *)dat[1].dat;
+  select_palette((PALETTE *)dat->dat);
   i = makecol(255,255,255);
   (*screen->vtable->clear_to_color)(screen,i);
   i = 200 - pBVar1->bmHeight / 2;
@@ -1279,7 +1335,7 @@ LAB_00411fa4:
   if (hurry_y + 99U < 579) {
     hurry_y -= 2;
   }
-  any13 = scroll_acc;
+
   if (((pTVar15->speed_increase != 0) && (pTVar19 = ply[iVar12], pTVar19->dead == 0)) &&
      ((speeds[local_974] < fall_count && (local_948 < 5)))) {
     pTVar19->ccc[local_974] = pTVar19->level;
@@ -1405,8 +1461,7 @@ LAB_00413186:
         goto LAB_00412930;
       }
       if (iVar24 < 6) {
-        piVar30 = (int *)((int)pTVar19 + iVar24 * 4 + 0x9c);
-        *piVar30 = *piVar30 + 1;
+        (*(int *)((int)pTVar19 + iVar24 * 4 + 0x9c))++;
         pTVar19 = ply[player_id];
         if (iVar24 != 1) goto LAB_004131be;
         local_960 = 1;
@@ -1422,8 +1477,7 @@ LAB_004131be:
       else {
         pTVar19->acc_level = pTVar19->acc_level + iVar24;
         pTVar19 = ply[player_id];
-        piVar30 = &pTVar19->acc_jumps;
-        *piVar30 = *piVar30 + 1;
+        pTVar19->acc_jumps++;
         pTVar19->in_combo = 100;
       }
       pTVar19 = ply[player_id];
@@ -2026,24 +2080,24 @@ LAB_00413e60:
     }
     if (debug == 0) {
       puVar32 = uppercase_alphabet;
-      piVar30 = last_keys;
+      int* pLastKeys = last_keys;
       for (iVar12 = 0x1f; iVar12 != 0; iVar12 = iVar12 + -1) {
-        *(char *)piVar30 = *puVar32;
+        *pLastKeys = *puVar32;
         puVar32 = puVar32 + 1;
-        piVar30 = (int *)((int)piVar30 + 1);
+        pLastKeys++;
       }
       uVar31 = 0xffffffff;
-      piVar30 = last_keys;
+      pLastKeys = last_keys;
       do {
         if (uVar31 == 0) break;
         uVar31 = uVar31 - 1;
-        cVar1 = *(char *)piVar30;
-        piVar30 = (int *)((int)piVar30 + 1);
+        cVar1 = *(char *)pLastKeys;
+        pLastKeys++;
       } while (cVar1 != '\0');
       uVar31 = ~uVar31 - 2;
       c.start = 0x2e002e;
       c.end = 0x2e;
-      iVar12 = _stricmp(profile->handle,"guest");
+      iVar12 = strcmp(profile->handle,"guest");
       bVar36 = iVar12 == 0;
       local_938 = 480.0;
       do {
@@ -2407,12 +2461,12 @@ LAB_00415112:
       } while (local_93c != 0);
       if (is_playing_custom_game != 0) goto LAB_00413fa0;
       if (recording != 0) {
-        keys_pressed[0] = (int)CONCAT12((unsigned int)c.end,CONCAT11(c.start._2_1_,(char)c.start));
+        //keys_pressed[0] = //(int)CONCAT12((unsigned int)c.end,CONCAT11(c.start._2_1_,(char)c.start));
         pcVar13 = (char *)keys_pressed;
         if (!bVar36) {
           pcVar13 = profile->handle;
         }
-        _strcpy((char *)key_flag,pcVar13);
+        strcpy((char *)key_flag,pcVar13);
         iVar24 = 0;
         do {
           if (0 < qualify[iVar24]) {

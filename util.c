@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include "gfx.h"
 #include "game.h"
 
 int get_logfile_path(char* filename, int len) {
